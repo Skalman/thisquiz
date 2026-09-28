@@ -292,12 +292,12 @@ pub fn check_form(fp: &FlatPuzzle) -> Vec<FormError> {
     let n = fp.n;
     let oc = fp.option_count;
 
-    // option_count must be 2..=5; the per-question checks below assume a valid
-    // count. Generated boards are 3 wide and up; 2 is for hand-built boards.
-    if !(2..=5).contains(&oc) {
+    // option_count must be 1..=5; the per-question checks below assume a valid
+    // count. Generated boards are 3 wide and up; 1 and 2 are for hand-built boards.
+    if !(1..=5).contains(&oc) {
         errors.push(FormError {
             qi: 0,
-            message: format!("option count {oc} is not 2 to 5"),
+            message: format!("option count {oc} is not 1 to 5"),
             severity: Severity::Error,
         });
         return errors;
@@ -490,20 +490,47 @@ mod tests {
     }
 
     #[test]
-    fn option_count_must_be_2_to_5() {
-        // oc=1 is what a ragged first option row can yield; parse never validates it.
+    fn option_count_must_be_1_to_5() {
+        // oc=0 is what an empty first option row yields; parse never validates it.
         let fp = flat(
             &[QuestionType::AnswerIsSelf],
             &[[OptionValue::UNUSED; 5]],
+            None,
+            0,
+        );
+        let errs = check_form(&fp);
+        assert!(
+            errs.iter()
+                .any(|e| e.severity == Severity::Error && e.message.contains("option count 0")),
+            "oc=0 should be a fatal form error: {errs:?}"
+        );
+    }
+
+    #[test]
+    fn one_question_one_option_is_well_formed_and_solves() {
+        let fp = flat(
+            &[QuestionType::AnswerIsSelf],
+            &[[
+                OptionValue::num(0),
+                OptionValue::UNUSED,
+                OptionValue::UNUSED,
+                OptionValue::UNUSED,
+                OptionValue::UNUSED,
+            ]],
             None,
             1,
         );
         let errs = check_form(&fp);
         assert!(
-            errs.iter()
-                .any(|e| e.severity == Severity::Error && e.message.contains("option count 1")),
-            "oc=1 should be a fatal form error: {errs:?}"
+            errs.iter().all(|e| e.severity != Severity::Error),
+            "a one-by-one board should pass: {errs:?}"
         );
+        let solutions = crate::solve_brute::solve(&fp, 2);
+        assert_eq!(solutions.len(), 1);
+        assert_eq!(solutions[0][0], Answer::A);
+        let result = crate::solve_deduce::solve(&fp);
+        assert!(result.solved);
+        assert_eq!(result.answers[0], Some(Answer::A));
     }
 
     #[test]
