@@ -15,6 +15,14 @@
   border-color: var(--border);
 }
 
+/* Eases a theme or design switch; important, to beat the utilities. */
+:root[data-switching],
+:root[data-switching] *,
+:root[data-switching] ::before,
+:root[data-switching] ::after {
+  transition: all 0.4s ease !important;
+}
+
 /* Controls keep the browser's line height, which their sizes are tuned to. */
 button,
 input {

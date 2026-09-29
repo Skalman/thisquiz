@@ -17,6 +17,7 @@ import { t } from "../i18n/index.ts";
 import { arrowNavHandler, menuNavHandler } from "../lib/keyboard.ts";
 import { classNames, tw } from "../lib/classNames.ts";
 import { storeDesign } from "../lib/design.ts";
+import { switchWithTransition } from "../lib/switchTransition.ts";
 import { useDesign, useStoredDesign } from "./DesignContext.tsx";
 import { LETTER_VARS } from "./LetterChip.tsx";
 
@@ -74,13 +75,15 @@ export function useTheme() {
 
   const select = useCallback((next: ThemeMode) => {
     const html = document.documentElement;
-    if (next === "auto") {
-      html.removeAttribute("data-theme");
-      localStorage.removeItem(THEME_KEY);
-    } else {
-      html.setAttribute("data-theme", next);
-      localStorage.setItem(THEME_KEY, next);
-    }
+    switchWithTransition(() => {
+      if (next === "auto") {
+        html.removeAttribute("data-theme");
+        localStorage.removeItem(THEME_KEY);
+      } else {
+        html.setAttribute("data-theme", next);
+        localStorage.setItem(THEME_KEY, next);
+      }
+    });
     setMode(next);
   }, []);
 
@@ -137,7 +140,7 @@ function ThemeOptions({
         aria-checked={play}
         onClick={(e) => {
           e.stopPropagation();
-          storeDesign(play ? "zen" : "play");
+          switchWithTransition(() => storeDesign(play ? "zen" : "play"));
         }}
       >
         <span class={classNames(PLAY_TOGGLE, LETTER_VARS[0], play ? PLAY_ON : PLAY_OFF)}>
