@@ -82,7 +82,7 @@ pub fn question_text(qt: &QuestionType) -> String {
         MostCommon => "Which is the most common answer?".into(),
         NoOtherHasAnswer => "Which answer is not the answer to any other question?".into(),
         EqualCount { answer } => {
-            format!("Which answer appears the same number of times as {answer}?")
+            format!("Which answer appears the same number of times as answer {answer}?")
         }
         AnswerIsSelf => "What is the answer to this question?".into(),
         LetterDist { question_index } => format!(
