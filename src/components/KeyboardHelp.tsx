@@ -47,7 +47,7 @@ export function KeyboardShortcutList() {
       {groups.map((group) => (
         <div key={group.title}>
           <h4 class="mb-1 text-body font-bold text-default">{group.title}</h4>
-          <dl class="m-0">
+          <dl>
             {group.shortcuts.map((sc) => (
               <div key={sc.keys[0]} class="flex items-baseline gap-3 py-0.5 text-chrome">
                 <dt class="w-36 shrink-0 text-right">
@@ -60,7 +60,7 @@ export function KeyboardShortcutList() {
                     </Fragment>
                   ))}
                 </dt>
-                <dd class="m-0 text-muted">{sc.desc}</dd>
+                <dd class="text-muted">{sc.desc}</dd>
               </div>
             ))}
           </dl>

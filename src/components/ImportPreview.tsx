@@ -60,7 +60,7 @@ export function ImportPreview({
               {s.backup.confirmUpload}
             </Button>
             <button
-              class="cursor-pointer border-none bg-transparent p-1 text-section leading-none text-muted hover:text-default"
+              class="cursor-pointer p-1 text-section leading-none text-muted hover:text-default"
               onClick={onCancel}
             >
               {s.backup.cancel}

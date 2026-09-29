@@ -214,7 +214,7 @@ export function SolvedDialog({
       titleClass="text-valid"
       onClose={onClose}
     >
-      <ul class="mb-3 ml-5 flex list-none flex-col gap-2 p-0 text-left text-body text-muted">
+      <ul class="mb-3 ml-5 flex flex-col gap-2 text-left text-body text-muted">
         {lines.map((line) => (
           <li key={line.label} class="flex items-start gap-2.5">
             <span class="inline-flex h-lh flex-none items-center text-section">{line.icon}</span>

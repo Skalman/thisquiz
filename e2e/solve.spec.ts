@@ -1,4 +1,13 @@
-import { test, expect, s, solveDayOneL1, DAY_ONE, DAY_ONE_L1 } from "./fixtures.ts";
+import {
+  test,
+  expect,
+  s,
+  cell,
+  markCorrect,
+  solveDayOneL1,
+  DAY_ONE,
+  DAY_ONE_L1,
+} from "./fixtures.ts";
 
 /** The stored entry for day-one level 1, ledger included. */
 function storedEntry(page: import("@playwright/test").Page) {
@@ -79,4 +88,32 @@ test("a board that arrives already solved is recorded as solved", async ({ page 
   await expect(async () => {
     expect(await storedEntry(page)).toMatch(/\|s(\.|$)/);
   }).toPass();
+});
+
+test("a tap on an option its question's answer blocks bounces off", async ({ page }) => {
+  await page.goto(DAY_ONE_L1);
+  await markCorrect(page, 0, 0);
+
+  const blocked = cell(page, 0, 1);
+  // aria-disabled: Playwright needs `force` to click.
+  await blocked.click({ force: true });
+
+  await expect(blocked).toHaveAttribute("data-mark", "unmarked");
+  await expect(blocked).toHaveAttribute("data-sweep", "true");
+});
+
+test("a tap on the solved board bounces off", async ({ page }) => {
+  await page.goto(DAY_ONE_L1);
+  await solveDayOneL1(page);
+  // The celebration dialog covers the board.
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
+
+  const answer = cell(page, 0, 0);
+  // aria-disabled: Playwright needs `force` to click.
+  await answer.click({ force: true });
+
+  await expect(answer).toHaveAttribute("data-mark", "correct");
+  await expect(answer).toHaveAttribute("data-sweep", "true");
 });

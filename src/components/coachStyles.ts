@@ -1,7 +1,7 @@
 import { tw } from "../lib/classNames.ts";
 
 /** The coach's line of text, in the board padding or floated over the board. */
-export const COACH_TEXT = tw`m-0 text-body leading-[1.35] text-balance`;
+export const COACH_TEXT = tw`text-body leading-[1.35] text-balance`;
 
 /** The overlay the arrows are drawn into, spanning its host. */
 export const COACH_SVG = tw`absolute inset-0 size-full overflow-visible`;

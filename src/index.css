@@ -10,12 +10,16 @@
 @import "./styles/base.css" layer(base);
 
 /* The project's own breakpoints, each strictly wider (exactly 768px is still
-   the narrow layout). sm: the archive loosens up. md: the header's controls
+   the narrow layout). xs: past the root ladder's smallest step, the play cells
+   loosen up. sm: the archive loosens up. md: the header's controls
    leave the ⋯ menu. lg: the board goes two columns — a column must fit five
-   nowrap option cells. The root font-size ladder lives in styles/base.css. */
+   nowrap option cells. xl: the same for the play design, whose cells are wider.
+   The root font-size ladder lives in styles/base.css. */
+@custom-variant xs (@media (width > 360px));
 @custom-variant sm (@media (width > 480px));
 @custom-variant md (@media (width > 768px));
 @custom-variant lg (@media (width > 840px));
+@custom-variant xl (@media (width > 960px));
 
 /* Only the project's own tokens become utilities. Colors resolve through the
    theme variables in styles/theme.css, which flip per light/dark theme. */
@@ -61,6 +65,8 @@
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
+  /* Play pill ends; finite, so a design switch animates. */
+  --radius-pill: 2rem;
 }
 
 @theme {
@@ -87,6 +93,74 @@
   --animate-coach-draw: coach-draw 0.7s ease forwards;
   --animate-nudge-say: nudge-say 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-nudge-said: nudge-said 0.3s ease forwards;
+  /* Play: mark pop, checkpoint hop and pulse, refusal wiggle. */
+  --animate-pop: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* Attention: bump, tint flash and outward ring, twice. */
+  --animate-attention: attention 0.8s ease-out 2 both;
+
+  @keyframes attention {
+    0% {
+      outline: 3px solid var(--accent);
+      outline-offset: 0;
+      transform: scale(1);
+    }
+    30% {
+      background-color: var(--accent-soft);
+      transform: scale(1.18);
+    }
+    100% {
+      outline: 3px solid transparent;
+      outline-offset: 14px;
+      transform: scale(1);
+    }
+  }
+  --animate-wiggle: wiggle 0.4s ease-in-out both;
+  --animate-sticker-pulse: sticker-pulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  @keyframes hop {
+    0%,
+    100% {
+      transform: none;
+    }
+    35% {
+      transform: translateY(-0.5rem) scale(1.04);
+    }
+    65% {
+      transform: translateY(0) scale(0.97);
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: none;
+    }
+    20% {
+      transform: translateX(-4px) rotate(-2deg);
+    }
+    40% {
+      transform: translateX(4px) rotate(2deg);
+    }
+    60% {
+      transform: translateX(-3px) rotate(-1deg);
+    }
+    80% {
+      transform: translateX(3px) rotate(1deg);
+    }
+  }
+  @keyframes sticker-pulse {
+    50% {
+      transform: scale(1.4);
+    }
+  }
+
+  @keyframes pop {
+    from {
+      transform: scale(0.3);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
 
   @keyframes coach-fade-in {
     from {
@@ -140,6 +214,16 @@
       opacity: 1;
     }
   }
+}
+
+/* Inline: these read variables set on each element. */
+@theme inline {
+  /* Delayed by the cell's --sweep-delay. */
+  --animate-hop: hop 0.45s ease-out var(--sweep-delay, 0ms) both;
+  --animate-lock-settle: sticker-pulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)
+    var(--sweep-delay, 0ms) both;
+  /* Play's lip, in the element's --lip color. */
+  --shadow-lip: 0 3px 0 var(--lip), var(--gloss-shade);
 }
 
 /* Colors scoped to one utility, named without repeating it: `bg-page`,

@@ -47,14 +47,14 @@ export function PuzzleShareDialog({
       title={s.share.share}
       onClose={onClose}
       controls={
-        <fieldset class="m-0 flex justify-center gap-1 border-none p-0" aria-label={s.share.opens}>
+        <fieldset class="flex justify-center gap-1" aria-label={s.share.opens}>
           {modes.map((x) => (
             <label
               key={x}
               class="relative cursor-pointer rounded-full border px-3 py-1 text-chrome text-muted hover:bg-hover has-checked:border-accent has-checked:bg-accent-soft has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
             >
               <input
-                class="absolute inset-0 m-0 cursor-pointer opacity-0 focus-visible:outline-none"
+                class="absolute inset-0 cursor-pointer opacity-0 focus-visible:outline-none"
                 type="radio"
                 name={groupName}
                 checked={mode === x}

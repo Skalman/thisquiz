@@ -1,6 +1,7 @@
 import { t } from "../i18n/index.ts";
 import { Dialog } from "./ui/Dialog.tsx";
 import { Button, buttonClass } from "./ui/Button.tsx";
+import { useDesign } from "./DesignContext.tsx";
 
 export function BackupDialog({
   onExport,
@@ -14,6 +15,7 @@ export function BackupDialog({
   onClose: () => void;
 }) {
   const s = t();
+  const design = useDesign();
   return (
     <Dialog title={s.backup.button} widthClass="max-w-88" onClose={onClose}>
       <div class="flex flex-col gap-2">
@@ -31,7 +33,7 @@ export function BackupDialog({
         >
           {s.backup.downloadBackup}
         </Button>
-        <label class={buttonClass({ variant: "primary", size: "lg", class: "w-full" })}>
+        <label class={buttonClass({ variant: "primary", size: "lg", design, class: "w-full" })}>
           {s.backup.uploadBackup}
           <input type="file" accept=".json" class="hidden" onChange={(e) => onImport(e)} />
         </label>

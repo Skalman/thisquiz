@@ -50,7 +50,7 @@ export default {
     checkpointWrong: "Not yet — something's off further back.",
     // `n` counts marks, not steps: the pins and retractions in the range don't
     // establish anything.
-    verifiedMarks: (n: number) => `Verified · ${n}`,
+    verifiedMarks: (n: number) => `Verified moves · ${n}`,
     verifiedTitle: (answered: number, questions: number) =>
       `Verified: ${answered} of ${questions} questions answered`,
     checkpointFailsTitle: (n: number) => plural(n, "refused checkpoint", "refused checkpoints"),
@@ -96,6 +96,8 @@ export default {
       hint: "Want a hint?",
     },
     start: "Start",
+    // The play design's question heading, in place of the bare number.
+    questionLabel: (n: number) => `Question #${n}:`,
     solvedBadge: "Solved",
     playAgain: "Play again",
     // The armed label: a second press is what actually discards the solve.
@@ -179,6 +181,8 @@ export default {
       dark: "Switch to dark theme",
     },
     themeModes: { auto: "Auto", light: "Light", dark: "Dark" },
+    // The play design's switch, beside the theme choice.
+    play: "Play",
   },
   share: {
     share: "Share",

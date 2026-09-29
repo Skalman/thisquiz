@@ -34,7 +34,7 @@ export function PrintSheet({
                 <div
                   class={classNames(
                     "print:flex print:flex-wrap print:pl-[1.2em]",
-                    q.options.some((option) => option.label.length > 12) &&
+                    q.options.some((option) => option.labelKind === "claim") &&
                       "print:flex-col print:gap-[0.1em]",
                   )}
                 >

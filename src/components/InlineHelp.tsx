@@ -39,13 +39,13 @@ export function InlineHelp({ highlight }: { highlight?: boolean }) {
     <div class="mx-auto mt-8 max-w-150 p-4 text-chrome leading-normal text-muted">
       <div
         class={classNames(
-          "-mx-3 rounded-lg border border-solid px-3 py-2 transition-colors duration-2000",
+          "-mx-3 rounded-lg border px-3 py-2 transition-colors duration-2000",
           show ? "border-accent bg-accent-soft" : "border-transparent",
         )}
       >
         <h4 class="mb-1 text-body font-bold text-default">{s.help.title}</h4>
         <p class="mb-2 font-medium text-default">{s.help.goal}</p>
-        <ol class="m-0 list-decimal pl-6">
+        <ol class="list-decimal pl-6">
           {s.help.howToPlaySteps(pointerKind()).map((step) => (
             <li key={step.text}>
               {step.text}

@@ -3,7 +3,13 @@ import type { RenderedQuestion, Marks } from "../engine/types.ts";
 import { LETTERS } from "../engine/types.ts";
 import type { Validity } from "../engine/state.ts";
 import { OptionButton } from "./OptionButton.tsx";
+import type { SweepKind } from "./OptionButton.tsx";
+import { LetterChip } from "./LetterChip.tsx";
+import { useDesign } from "./DesignContext.tsx";
 import { classNames, tw } from "../lib/classNames.ts";
+import type { Design } from "../lib/design.ts";
+import { splitBoardText } from "../lib/boardText.ts";
+import { t } from "../i18n/index.ts";
 
 interface Props {
   index: number;
@@ -15,12 +21,11 @@ interface Props {
   checkpointedMask?: number;
   /** Bitmask of options playing the checkpointed sweep right now. */
   sweepMask?: number;
+  sweepKind?: SweepKind;
   focusedOption?: number | null;
   defaultFocus?: boolean;
   onOptionClick: (questionIndex: number, optionIndex: number) => void;
 }
-
-const LONG_THRESHOLD = 12;
 
 /**
  * The bar down a question's left edge, in styles that read without color.
@@ -29,12 +34,60 @@ const LONG_THRESHOLD = 12;
  * collapsing to solid at the smaller root font sizes.
  */
 const VALIDITY_BAR: Record<Validity, string> = {
-  neutral: tw`relative w-[4px] before:absolute before:inset-y-0 before:right-px before:left-0 before:rounded-full before:bg-neutral-bar`,
-  valid: tw`w-[4px] rounded-full bg-valid`,
-  consistent: tw`w-[4px] rounded-full bg-valid`,
-  pending: tw`w-0 border-0 border-l-4 border-dotted border-pending`,
-  invalid: tw`w-0 border-0 border-l-4 border-double border-invalid`,
+  neutral: tw`relative w-(--bar) before:absolute before:inset-y-0 before:right-(--bar-inset) before:left-0 before:rounded-full before:bg-neutral-bar`,
+  valid: tw`w-(--bar) rounded-full bg-valid`,
+  consistent: tw`w-(--bar) rounded-full bg-valid`,
+  pending: tw`w-0 border-l-(length:--bar) border-dotted border-pending`,
+  invalid: tw`w-0 border-l-(length:--bar) border-double border-invalid`,
 };
+
+/** The bar's gap and width, per design; play's is twice as wide. */
+const BAR: Record<Design, string> = {
+  zen: tw`mr-2 [--bar-inset:1px] [--bar:4px]`,
+  play: tw`mr-3 [--bar-inset:2px] [--bar:8px]`,
+};
+
+/** Row spacing per design: zen ruled, play spaced. */
+const ROW: Record<Design, string> = {
+  zen: tw`border-b py-2 lg:row-span-2 lg:grid-rows-subgrid`,
+  // Two columns from the play board's own breakpoint.
+  play: tw`py-5 xl:row-span-2 xl:grid-rows-subgrid`,
+};
+const HEADING: Record<Design, string> = {
+  zen: tw`mb-1 flex gap-1.5`,
+  // Inline, so text wraps on after the label.
+  play: tw`mb-2.5 text-section leading-relaxed`,
+};
+const OPTIONS_GAP: Record<Design, string> = {
+  zen: tw`gap-1`,
+  play: tw`gap-1 xs:gap-1.5`,
+};
+
+/** Play's question text; tokens never break from their words. */
+function PlayText({ text }: { text: string }) {
+  return (
+    <span class="group-has-focus-visible:text-accent">
+      {splitBoardText(text).map((part, i) => {
+        if (part.kind === "text") {
+          // oxlint-disable-next-line react/no-array-index-key
+          return <span key={i}>{part.text}</span>;
+        }
+        return (
+          // oxlint-disable-next-line react/no-array-index-key
+          <span key={i} class="whitespace-nowrap">
+            {part.lead}
+            {part.kind === "letter" ? (
+              <LetterChip letter={part.letter} class="mx-[0.2em]" />
+            ) : (
+              <span class="rounded-full bg-hover px-1.5 font-bold">#{part.number}</span>
+            )}
+            {part.tail}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 function marksEqual(a: Marks, b: Marks): boolean {
   for (let i = 0; i < 5; i++) if (a[i] !== b[i]) return false;
@@ -50,29 +103,49 @@ export const QuestionRow = memo(
     disabled,
     checkpointedMask = 0,
     sweepMask = 0,
+    sweepKind = "settle",
     focusedOption,
     defaultFocus,
     onOptionClick,
   }: Props) {
-    const isLong = question.options.some((option) => option.label.length > LONG_THRESHOLD);
-    const hasCorrect = marks.indexOf("correct") >= 0;
+    const design = useDesign();
+    // Claims stack, one per line.
+    const isClaims = question.options.some((option) => option.labelKind === "claim");
+    const correctIdx = marks.indexOf("correct");
+    const hasCorrect = correctIdx >= 0;
+    const isCheckpointed = (oi: number) => ((checkpointedMask >> oi) & 1) === 1;
+    const answerVerified = hasCorrect && isCheckpointed(correctIdx);
 
     return (
       <div
-        class="group grid scroll-mb-20 grid-cols-[auto_1fr] grid-rows-[auto_auto] border-b py-2 lg:row-span-2 lg:grid-rows-subgrid"
+        class={`group grid scroll-mb-20 grid-cols-[auto_1fr] grid-rows-[auto_auto] ${ROW[design]}`}
         data-row={index}
       >
-        <div class={`row-span-full mr-2 shrink-0 self-stretch ${VALIDITY_BAR[validity]}`} />
-        <div class="col-start-2 mb-1 flex gap-1.5">
-          <span class="shrink-0 text-body font-bold text-muted group-has-focus-visible:text-accent">
-            {index + 1}.
-          </span>
-          <span class="text-body group-has-focus-visible:text-accent">{question.text}</span>
+        <div
+          class={`row-span-full shrink-0 self-stretch ${BAR[design]} ${VALIDITY_BAR[validity]}`}
+        />
+        <div class={`col-start-2 ${HEADING[design]}`}>
+          {design === "play" ? (
+            <>
+              <span class="me-1.5 font-extrabold whitespace-nowrap text-accent">
+                {t().puzzle.questionLabel(index + 1)}
+              </span>
+              <PlayText text={question.text} />
+            </>
+          ) : (
+            <>
+              <span class="shrink-0 text-body font-bold text-muted group-has-focus-visible:text-accent">
+                {index + 1}.
+              </span>
+              <span class="text-body group-has-focus-visible:text-accent">{question.text}</span>
+            </>
+          )}
         </div>
         <div
           class={classNames(
             "col-start-2 flex self-start *:flex-1",
-            isLong ? "flex-col gap-1 *:whitespace-normal" : "gap-1",
+            OPTIONS_GAP[design],
+            isClaims && "flex-col *:whitespace-normal",
           )}
         >
           {question.options.map((option, oi) => (
@@ -81,11 +154,16 @@ export const QuestionRow = memo(
               index={oi}
               questionIndex={index}
               label={option.label}
+              labelKind={option.labelKind}
               mark={marks[oi]}
               implied={hasCorrect && marks[oi] === "unmarked"}
-              disabled={disabled || (hasCorrect && marks[oi] !== "correct")}
-              checkpointed={((checkpointedMask >> oi) & 1) === 1}
+              answered={hasCorrect}
+              blocked={disabled || (hasCorrect && marks[oi] !== "correct")}
+              checkpointed={isCheckpointed(oi)}
+              // One pin per verified answer; none once solved.
+              showLock={!disabled && isCheckpointed(oi) && (!answerVerified || oi === correctIdx)}
               sweep={((sweepMask >> oi) & 1) === 1}
+              sweepKind={sweepKind}
               focused={focusedOption === oi || (defaultFocus && oi === 0)}
               onClick={() => onOptionClick(index, oi)}
             />
@@ -102,6 +180,7 @@ export const QuestionRow = memo(
     prev.disabled === next.disabled &&
     prev.checkpointedMask === next.checkpointedMask &&
     prev.sweepMask === next.sweepMask &&
+    prev.sweepKind === next.sweepKind &&
     prev.focusedOption === next.focusedOption &&
     prev.defaultFocus === next.defaultFocus &&
     prev.onOptionClick === next.onOptionClick,

@@ -5,7 +5,7 @@ export function Loading({ children }: { children?: ComponentChildren }) {
   return (
     <div class="flex justify-center p-8">
       {children ?? (
-        <span class="size-6 animate-spinner rounded-full border-2 border-solid border-t-accent opacity-0" />
+        <span class="size-6 animate-spinner rounded-full border-2 border-t-accent opacity-0" />
       )}
     </div>
   );

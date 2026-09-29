@@ -37,6 +37,7 @@ import { Loading } from "./components/ui/Loading.tsx";
 import { NoticePage } from "./components/ui/NoticePage.tsx";
 import { Link } from "./components/ui/Link.tsx";
 import { adoptDebugParam } from "./lib/debug.ts";
+import { DesignContext, useStoredDesign } from "./components/DesignContext.tsx";
 
 adoptDebugParam();
 
@@ -315,22 +316,25 @@ function NotFound() {
 }
 
 export function App() {
+  const design = useStoredDesign();
   return (
     <LocationProvider>
-      <div class="mx-auto max-w-272 p-safe-4">
-        <ErrorOverlay />
-        <Router>
-          <Route path="/" component={DailyPage} />
-          <Route path="/archive" component={ArchivePage} />
-          <Route path="/past" component={ArchiveRedirect} />
-          <Route path="/sync" component={SyncRoute} />
-          <Route path="/playground" component={PlaygroundRoute} />
-          <Route path="/:date/:level" component={DayRoute} />
-          <Route default component={NotFound} />
-        </Router>
-        <PageFooter />
-        {import.meta.env.DEV && <SafeAreaSimulator />}
-      </div>
+      <DesignContext.Provider value={design}>
+        <div class="mx-auto max-w-272 p-safe-4">
+          <ErrorOverlay />
+          <Router>
+            <Route path="/" component={DailyPage} />
+            <Route path="/archive" component={ArchivePage} />
+            <Route path="/past" component={ArchiveRedirect} />
+            <Route path="/sync" component={SyncRoute} />
+            <Route path="/playground" component={PlaygroundRoute} />
+            <Route path="/:date/:level" component={DayRoute} />
+            <Route default component={NotFound} />
+          </Router>
+          <PageFooter />
+          {import.meta.env.DEV && <SafeAreaSimulator />}
+        </div>
+      </DesignContext.Provider>
     </LocationProvider>
   );
 }

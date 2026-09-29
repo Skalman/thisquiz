@@ -33,7 +33,7 @@ export function Dialog({
     <dialog
       ref={ref}
       class={classNames(
-        "m-auto max-h-[80vh] w-[calc(100%-1rem)] overflow-y-auto rounded-xl border border-solid border-strong bg-surface p-0 text-default shadow-dialog backdrop:bg-backdrop",
+        "m-auto max-h-[80vh] w-[calc(100%-1rem)] overflow-y-auto rounded-xl border border-strong bg-surface text-default shadow-dialog backdrop:bg-backdrop",
         widthClass,
         extraClass,
       )}

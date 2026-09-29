@@ -9,7 +9,7 @@ import { t } from "../i18n/index.ts";
 function FooterLink({ onClick, children }: { onClick: () => void; children: ComponentChildren }) {
   return (
     <button
-      class="cursor-pointer border-none bg-transparent px-2 py-1 text-muted [font:inherit] hover:text-default hover:underline"
+      class="cursor-pointer px-2 py-1 text-muted hover:text-default hover:underline"
       onClick={onClick}
     >
       {children}

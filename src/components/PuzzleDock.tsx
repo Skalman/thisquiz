@@ -1,9 +1,10 @@
+import { useEffect, useState } from "preact/hooks";
 import type { ComponentChildren, Ref } from "preact";
 import type { ExplainStep } from "../engine/hint-types.ts";
 import { arrowNavHandler } from "../lib/keyboard.ts";
 import { t } from "../i18n/index.ts";
 import { HintStep } from "./HintStep.tsx";
-import { IconUndo, IconRedo, IconPin, IconHint } from "./Icons.tsx";
+import { IconUndo, IconRedo, IconPin, IconHint, IconReplay } from "./Icons.tsx";
 import { Button, ButtonLink } from "./ui/Button.tsx";
 
 function HintBox({ children }: { children: ComponentChildren }) {
@@ -59,7 +60,7 @@ export function CheckpointNote({ text, onDismiss }: { text: string; onDismiss: (
     >
       <span>{text}</span>
       <button
-        class="ms-auto flex-none cursor-pointer border-none bg-transparent p-0 text-[1.1em] leading-none text-inherit opacity-70 hover:opacity-100"
+        class="ms-auto flex-none cursor-pointer text-[1.1em] leading-none opacity-70 hover:opacity-100"
         aria-label={s.aria.dismiss}
         onClick={onDismiss}
       >
@@ -150,25 +151,71 @@ export function PuzzleControls({
   );
 }
 
-/**
- * The solved board's ways onward: its summary, then the next level, or the
- * archive after the last. `quiet` while the solved dialog carries the same two.
- * The auto margin holds it to the row's end whether it shares the track's line
- * or wraps below it, level with an expanded track's first row.
- */
+/** How long Play again calls attention to itself after a cue. */
+const CUE_MS = 1800;
+
+/** Clears the board for another run; two presses, since it's final. */
+function PlayAgainButton({ onPlayAgain, cue }: { onPlayAgain: () => void; cue: number }) {
+  const s = t();
+  const [armed, setArmed] = useState(false);
+  const [cued, setCued] = useState(false);
+  useEffect(() => {
+    if (cue === 0) return undefined;
+    setCued(true);
+    const timer = setTimeout(() => setCued(false), CUE_MS);
+    return () => clearTimeout(timer);
+  }, [cue]);
+  useEffect(() => {
+    if (!armed) return undefined;
+    const timer = setTimeout(() => setArmed(false), 3000);
+    return () => clearTimeout(timer);
+  }, [armed]);
+  return (
+    <Button
+      // Keyed on the cue to restart the animation.
+      key={cue}
+      // Both looks have borders, so arming keeps the size.
+      variant={armed ? "danger" : "outline-muted"}
+      class={
+        cued
+          ? "motion-safe:animate-attention motion-reduce:bg-accent-soft motion-reduce:outline-3 motion-reduce:outline-accent"
+          : undefined
+      }
+      icon={<IconReplay size="1em" />}
+      onClick={() => {
+        if (!armed) {
+          setArmed(true);
+          return;
+        }
+        setArmed(false);
+        onPlayAgain();
+      }}
+    >
+      {armed ? s.puzzle.playAgainConfirm : s.puzzle.playAgain}
+    </Button>
+  );
+}
+
+/** The solved board's ways onward, held to the row's end. */
 export function CompletionBar({
   barRef,
   nextRef,
   quiet,
   hasNext,
+  replayCue,
+  onPlayAgain,
   onSummary,
   onNext,
 }: {
   barRef: Ref<HTMLDivElement>;
   /** A callback, so one ref takes whichever element renders: the button or the link. */
   nextRef: (el: HTMLElement | null) => void;
+  /** While the solved dialog shows the same ways onward. */
   quiet: boolean;
   hasNext: boolean;
+  /** Bumped per press on the solved board, cueing Play again. */
+  replayCue: number;
+  onPlayAgain: () => void;
   onSummary: () => void;
   onNext: () => void;
 }) {
@@ -182,6 +229,7 @@ export function CompletionBar({
       data-testid="completion-bar"
       aria-label={s.puzzle.solved}
     >
+      <PlayAgainButton onPlayAgain={onPlayAgain} cue={replayCue} />
       <Button variant="ghost" onClick={onSummary}>
         {s.puzzle.summary}
       </Button>

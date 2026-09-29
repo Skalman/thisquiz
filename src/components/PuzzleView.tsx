@@ -14,6 +14,7 @@ import { debugEnabled } from "../lib/debug.ts";
 import { track, getClientInfo } from "../lib/analytics.ts";
 import { t } from "../i18n/index.ts";
 import { QuestionRow } from "./QuestionRow.tsx";
+import type { SweepKind } from "./OptionButton.tsx";
 import {
   HistoryStrip,
   ENABLED_HISTORY_STEP,
@@ -40,22 +41,38 @@ import {
   PuzzleControls,
 } from "./PuzzleDock.tsx";
 import { LEVELS } from "../puzzles/daily.ts";
+import { useDesign } from "./DesignContext.tsx";
+import { classNames, tw } from "../lib/classNames.ts";
+import type { Design } from "../lib/design.ts";
+
+/** A short board: one centered column. */
+const SHORT_BOARD = tw`mx-auto py-4 *:last:border-b-0`;
+
+/** The question grid; play's goes two-column at a wider width. */
+const BOARD_GRID: Record<Design, { short: string; long: string }> = {
+  zen: {
+    short: tw`lg:grid lg:max-w-[min(50%,25rem)] lg:grid-cols-1`,
+    long: tw`lg:grid lg:grid-flow-col lg:grid-cols-2 lg:gap-x-6`,
+  },
+  play: {
+    short: tw`xl:grid xl:max-w-[min(50%,25rem)] xl:grid-cols-1`,
+    long: tw`xl:grid xl:grid-flow-col xl:grid-cols-2 xl:gap-x-6`,
+  },
+};
 
 /** The mark shortcuts, one per option letter. */
 const OPTION_KEYS = LETTERS.map((letter) => letter.toLowerCase());
 
-/** How long `.option-btn.sweep` stays on: the CSS duration plus slack. */
+/** Sweep duration: longest animation, stagger and slack. */
 const SWEEP_MS = 1000;
+
+/** The longest stagger in a sweep: the far corner's delay, in ms. */
+const SWEEP_STAGGER_MS = 450;
 
 /** How long a granted checkpoint's note stays up while the tab is visible. */
 const NOTE_MS = 25_000;
 
-/**
- * Geometry for `.option-btn.sweep`: the board's span, and each sweeping
- * cell's diagonal distance (x + y) past the first sweeping cell. Board-sized
- * so the wave's speed doesn't depend on how many cells light; anchored on the
- * cells so a lone refused click is hit at once.
- */
+/** Sweep geometry: board span, each cell's diagonal offset and delay. */
 function placeSweep(grid: HTMLElement) {
   const cells = Array.from(grid.querySelectorAll<HTMLElement>("[data-sweep]"));
   const diagonals = cells.map((cell) => {
@@ -64,8 +81,16 @@ function placeSweep(grid: HTMLElement) {
   });
   const first = Math.min(...diagonals);
   const { width, height } = grid.getBoundingClientRect();
-  grid.style.setProperty("--sweep-span", `${width + height}px`);
-  cells.forEach((cell, i) => cell.style.setProperty("--sweep-d", `${diagonals[i] - first}px`));
+  const span = width + height;
+  grid.style.setProperty("--sweep-span", `${span}px`);
+  cells.forEach((cell, i) => {
+    const distance = diagonals[i] - first;
+    cell.style.setProperty("--sweep-d", `${distance}px`);
+    cell.style.setProperty(
+      "--sweep-delay",
+      `${Math.round((distance / span) * SWEEP_STAGGER_MS)}ms`,
+    );
+  });
 }
 
 /** A blank board: every question with every option unmarked. */
@@ -135,6 +160,7 @@ export function PuzzleView({
   onChanged,
 }: PuzzleViewProps) {
   const s = t();
+  const design = useDesign();
   const debugMode = debugEnabled();
 
   // Ephemeral (playground) mode persists nothing: the puzzle is fully described
@@ -490,9 +516,13 @@ export function PuzzleView({
    * one cell a click bounced off. Cleared once the animation has run.
    */
   const [sweepMasks, setSweepMasks] = useState<number[] | null>(null);
+  const [sweepKind, setSweepKind] = useState<SweepKind>("settle");
+  // Bumped per press on the solved board.
+  const [replayCue, setReplayCue] = useState(0);
   const sweepTimer = useRef(0);
-  function playSweep(masks: number[]) {
+  function playSweep(masks: number[], kind: SweepKind) {
     clearTimeout(sweepTimer.current);
+    setSweepKind(kind);
     setSweepMasks(masks);
     sweepTimer.current = window.setTimeout(() => setSweepMasks(null), SWEEP_MS);
   }
@@ -524,16 +554,33 @@ export function PuzzleView({
   }
 
   function handleOptionClick(questionIdx: number, optionIdx: number) {
+    setFocusedQuestion(questionIdx);
+    setFocusedOption(optionIdx);
+    // A cell the press can't change bounces it.
+    const refuse = () =>
+      playSweep(
+        puzzle.questions.map((_q, qi) => (qi === questionIdx ? 1 << optionIdx : 0)),
+        "refuse",
+      );
+    // Solved: the press points to Play again.
+    if (completed) {
+      refuse();
+      setReplayCue((n) => n + 1);
+      return;
+    }
     const verified = checkpointBoard();
     if (verified && verified[questionIdx].marks[optionIdx] !== "unmarked") {
-      playSweep(puzzle.questions.map((_q, qi) => (qi === questionIdx ? 1 << optionIdx : 0)));
+      refuse();
       return;
     }
     const next = cloneStates(questionsRef.current);
     const q = next[questionIdx];
     const current = q.marks[optionIdx];
     const hasCorrect = q.marks.indexOf("correct") >= 0;
-    if (hasCorrect && current !== "correct") return;
+    if (hasCorrect && current !== "correct") {
+      refuse();
+      return;
+    }
 
     if (current === "unmarked") {
       q.marks[optionIdx] = "incorrect";
@@ -546,8 +593,6 @@ export function PuzzleView({
     }
 
     applyChange(next);
-    setFocusedQuestion(questionIdx);
-    setFocusedOption(optionIdx);
   }
 
   const optionClickRef = useRef(handleOptionClick);
@@ -651,7 +696,7 @@ export function PuzzleView({
     hints.clear();
     setCheckpointNote(s.puzzle.checkpointSet);
     // Announce what this checkpoint settled that the last one hadn't.
-    playSweep(newlySettledMasks());
+    playSweep(newlySettledMasks(), "settle");
   }
 
   /** Back to a blank board and an empty track — the solve, and its record, go. */
@@ -666,6 +711,7 @@ export function PuzzleView({
     revalidate(fresh);
     hints.clear();
     setCheckpointNote(null);
+    setReplayCue(0);
     historyBurstRef.current.lastTime = 0;
     analytics.restart();
   }
@@ -846,7 +892,7 @@ export function PuzzleView({
       case "Enter":
       case " ":
         e.preventDefault();
-        if (focusedQuestionRef.current != null && focusedOptionRef.current != null && !completed) {
+        if (focusedQuestionRef.current != null && focusedOptionRef.current != null) {
           handleOptionClick(focusedQuestionRef.current, focusedOptionRef.current);
         }
         break;
@@ -894,8 +940,9 @@ export function PuzzleView({
     };
     // An option letter marks that option on the focused question; a digit feeds
     // the question-number buffer.
+    // Also live when solved, bouncing like a press.
     OPTION_KEYS.forEach((key, oi) => {
-      bindings[key] = whileSolving(() => {
+      bindings[key] = guarded(() => {
         const qi = focusedQuestionRef.current;
         if (qi != null) keyActionsRef.current.markOption(qi, oi);
       });
@@ -916,8 +963,8 @@ export function PuzzleView({
           class={
             // Short boards get air on both ends; the dock's own border closes the grid.
             puzzle.questions.length <= 3
-              ? "mx-auto py-4 *:last:border-b-0 lg:grid lg:max-w-[min(50%,25rem)] lg:grid-flow-row lg:grid-cols-1 lg:gap-x-6 lg:gap-y-0"
-              : "lg:grid lg:grid-flow-col lg:grid-cols-2 lg:gap-x-6 lg:gap-y-0"
+              ? classNames(SHORT_BOARD, BOARD_GRID[design].short)
+              : BOARD_GRID[design].long
           }
           style={{
             gridTemplateRows: `repeat(${Math.ceil(puzzle.questions.length / 2) * 2}, auto)`,
@@ -940,6 +987,7 @@ export function PuzzleView({
               disabled={completed}
               checkpointedMask={checkpointedMasks[qi]}
               sweepMask={sweepMasks?.[qi] ?? 0}
+              sweepKind={sweepKind}
               focusedOption={focusedQuestion === qi ? focusedOption : null}
               defaultFocus={focusedQuestion == null && qi === 0}
               onOptionClick={stableOptionClick}
@@ -1014,19 +1062,20 @@ export function PuzzleView({
                 fails={failMarkers.current}
                 completed={completed}
                 onJump={handleJumpTo}
-                onPlayAgain={handlePlayAgain}
                 containerRef={historyStripRef}
               />
             )}
 
             {/* The completion bar: the ways onward, at the end of the row.
-                The dialog carries the same two while it is up. */}
+                The dialog carries its last two while it is up. */}
             {completed && (
               <CompletionBar
                 barRef={puzzleCompleteRef}
                 nextRef={setNextPuzzleRef}
                 quiet={solvedDialog !== null}
                 hasNext={level < LEVELS.length}
+                replayCue={replayCue}
+                onPlayAgain={handlePlayAgain}
                 onSummary={() => setSolvedDialog("summary")}
                 onNext={onNextPuzzle}
               />

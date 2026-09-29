@@ -48,6 +48,38 @@
   --level-color-hard: #e85d04;
   --level-color-expert: #d42a4a;
 
+  /* Play's per-letter colors, deep text shades and tints. */
+  --letter-a: #ffc400;
+  --letter-b: #6aadff;
+  --letter-c: #e866f5;
+  --letter-d: #fb923c;
+  --letter-e: #2dd4bf;
+  --on-letter-a: #5c3b00;
+  --on-letter-b: #0a2a66;
+  --on-letter-c: #4a0657;
+  --on-letter-d: #5a2303;
+  --on-letter-e: #064e45;
+  --letter-a-soft: color-mix(in srgb, var(--letter-a) 35%, var(--bg-surface));
+  --letter-b-soft: color-mix(in srgb, var(--letter-b) 30%, var(--bg-surface));
+  --letter-c-soft: color-mix(in srgb, var(--letter-c) 30%, var(--bg-surface));
+  --letter-d-soft: color-mix(in srgb, var(--letter-d) 30%, var(--bg-surface));
+  --letter-e-soft: color-mix(in srgb, var(--letter-e) 30%, var(--bg-surface));
+  /* Play's gloss: top highlight and bottom shade. */
+  --gloss: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.6),
+    rgb(255 255 255 / 0.12) 48%,
+    rgb(255 255 255 / 0) 52%
+  );
+  --gloss-shade: inset 0 -3px 0 rgb(0 0 0 / 0.07);
+
+  /* A letter on its tint, darkened to read; bright when dark. */
+  --letter-a-text: color-mix(in srgb, var(--letter-a), var(--on-letter-a) 70%);
+  --letter-b-text: color-mix(in srgb, var(--letter-b), var(--on-letter-b) 55%);
+  --letter-c-text: color-mix(in srgb, var(--letter-c), var(--on-letter-c) 50%);
+  --letter-d-text: color-mix(in srgb, var(--letter-d), var(--on-letter-d) 50%);
+  --letter-e-text: color-mix(in srgb, var(--letter-e), var(--on-letter-e) 50%);
+
   /* The scrim behind every dialog; the dark themes deepen it, since their
      page is already near-black. */
   --backdrop: rgba(0, 0, 0, 0.4);
@@ -78,6 +110,22 @@
   --dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   --backdrop: rgba(0, 0, 0, 0.6);
   --level-color-intro: #cbd5e1;
+  --letter-a: #fbbf24;
+  --letter-b: #7ab8ff;
+  --letter-c: #e879f9;
+  --letter-d: #fb923c;
+  --letter-e: #2dd4bf;
+  --gloss: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.28),
+    rgb(255 255 255 / 0.06) 48%,
+    rgb(255 255 255 / 0) 52%
+  );
+  --letter-a-text: var(--letter-a);
+  --letter-b-text: var(--letter-b);
+  --letter-c-text: var(--letter-c);
+  --letter-d-text: var(--letter-d);
+  --letter-e-text: var(--letter-e);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -104,5 +152,21 @@
     --dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     --backdrop: rgba(0, 0, 0, 0.6);
     --level-color-intro: #cbd5e1;
+    --letter-a: #fbbf24;
+    --letter-b: #7ab8ff;
+    --letter-c: #e879f9;
+    --letter-d: #fb923c;
+    --letter-e: #2dd4bf;
+    --gloss: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.28),
+      rgb(255 255 255 / 0.06) 48%,
+      rgb(255 255 255 / 0) 52%
+    );
+    --letter-a-text: var(--letter-a);
+    --letter-b-text: var(--letter-b);
+    --letter-c-text: var(--letter-c);
+    --letter-d-text: var(--letter-d);
+    --letter-e-text: var(--letter-e);
   }
 }

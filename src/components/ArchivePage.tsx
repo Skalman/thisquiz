@@ -7,6 +7,8 @@ import { useToday } from "../lib/today.ts";
 import { LEVELS, dateStrFromOffset, isValidDate } from "../puzzles/daily.ts";
 import { dayStates, isSolved, resumeLevel } from "../puzzles/progress.ts";
 import { t } from "../i18n/index.ts";
+import type { Design } from "../lib/design.ts";
+import { useDesign } from "./DesignContext.tsx";
 
 interface WeekInfoLocale extends Intl.Locale {
   getWeekInfo?: () => { firstDay: number };
@@ -67,9 +69,25 @@ const TINT = {
   "": tw`bg-surface`,
 };
 
+/** A day's box, in either design. */
+const DAY_BOX = tw`flex flex-col items-center justify-center gap-1.5 text-default hover:border-accent`;
+
+/** Per design; zen's today uses an inset ring, keeping row height. */
+const DAY: Record<Design, { box: string; today: string }> = {
+  zen: {
+    box: tw`rounded-lg border py-1.5 transition-colors duration-150`,
+    today: tw`ring-1 ring-accent ring-inset`,
+  },
+  play: {
+    box: tw`rounded-xl border-2 bg-(image:--gloss) py-2 font-semibold shadow-lip [--lip:var(--border)] active:translate-y-0.5 active:shadow-none motion-safe:transition-[translate,box-shadow,border-color] motion-safe:duration-100`,
+    today: tw`[--lip:var(--accent)]`,
+  },
+};
+
 /** One day of the archive: its date, a six-level rail, and a done-ness tint. */
 function ArchiveDay({ dateStr, day, isToday }: { dateStr: string; day: number; isToday: boolean }) {
   const s = t();
+  const design = useDesign();
   const states = dayStates(dateStr);
   const solved = states.filter(isSolved).length;
   const stale = states.filter((state) => state.stale).length;
@@ -89,12 +107,11 @@ function ArchiveDay({ dateStr, day, isToday }: { dateStr: string; day: number; i
     <a
       href={`/${dateStr}/${target}`}
       class={classNames(
-        // Hover moves the border, not the background: the tint is the whole point.
-        "flex flex-col items-center justify-center gap-1.5 rounded-lg border py-1.5 text-default transition-colors duration-150 hover:border-accent",
+        DAY_BOX,
+        DAY[design].box,
         TINT[tint],
-        // Today is doubled by an inset ring rather than a 2px border, which would
-        // make its row taller than the rest.
-        isToday && "border-accent ring-1 ring-accent ring-inset",
+        isToday && "border-accent",
+        isToday && DAY[design].today,
       )}
       aria-label={label}
     >

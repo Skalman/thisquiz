@@ -16,6 +16,9 @@ import { Button, ButtonLink, buttonClass } from "./ui/Button.tsx";
 import { t } from "../i18n/index.ts";
 import { arrowNavHandler, menuNavHandler } from "../lib/keyboard.ts";
 import { classNames, tw } from "../lib/classNames.ts";
+import { storeDesign } from "../lib/design.ts";
+import { useDesign, useStoredDesign } from "./DesignContext.tsx";
+import { LETTER_VARS } from "./LetterChip.tsx";
 
 if (import.meta.env.DEV) document.title = `(dev) ${document.title}`;
 
@@ -94,20 +97,19 @@ export function useTheme() {
 }
 
 /**
- * The explicit Auto / Light / Dark choice, revealed by a disclosure: the
- * header's split-button popup and the ⋯ menu's expanded block both render it.
- * `itemClass` adds to the rows, for how the host sets them apart.
+ * Theme choices and the Play switch; picks keep the menu open. `itemClass`
+ * adds to the rows, for how the host sets them apart.
  */
 function ThemeOptions({
   theme,
   itemClass,
-  onPick,
 }: {
   theme: ReturnType<typeof useTheme>;
   itemClass?: string;
-  onPick?: () => void;
 }) {
   const s = t();
+  const design = useStoredDesign();
+  const play = design === "play";
   return (
     <>
       {THEME_MODES.map((choice) => (
@@ -119,7 +121,6 @@ function ThemeOptions({
           onClick={(e) => {
             e.stopPropagation();
             theme.select(choice);
-            onPick?.();
           }}
         >
           <IconCheck
@@ -129,12 +130,32 @@ function ThemeOptions({
           {s.header.themeModes[choice]}
         </MenuItem>
       ))}
+      <hr />
+      <MenuItem
+        class={itemClass}
+        role="menuitemcheckbox"
+        aria-checked={play}
+        onClick={(e) => {
+          e.stopPropagation();
+          storeDesign(play ? "zen" : "play");
+        }}
+      >
+        <span class={classNames(PLAY_TOGGLE, LETTER_VARS[0], play ? PLAY_ON : PLAY_OFF)}>
+          {play && <IconCheck size="0.9em" strokeWidth={4} />}
+          {s.header.play}
+        </span>
+      </MenuItem>
     </>
   );
 }
 
 /** A theme choice's row: the check shows on the chosen one. */
 const THEME_ROW = tw`group aria-checked:font-semibold aria-checked:text-accent`;
+
+/** The Play switch: a letter-A pill, solid while on. */
+const PLAY_TOGGLE = tw`inline-flex items-center gap-1 rounded-full border-2 border-(--letter) bg-(image:--gloss) px-3 py-0.5 font-bold shadow-lip`;
+const PLAY_OFF = tw`bg-(--letter-soft) text-(--letter-text) [--lip:var(--letter)]`;
+const PLAY_ON = tw`bg-(--letter) text-(--on-letter) [--lip:color-mix(in_srgb,var(--letter),black_30%)]`;
 
 type InstallState =
   | { type: "native"; fire: () => void }
@@ -199,6 +220,7 @@ export function AppHeader({
 }) {
   const s = t();
   const theme = useTheme();
+  const design = useDesign();
   const install = useInstall();
   const isInstalled = window.matchMedia("(display-mode: standalone)").matches;
   const [showInstallInfo, setShowInstallInfo] = useState(false);
@@ -249,7 +271,7 @@ export function AppHeader({
 
   return (
     <header class="relative mb-4 flex items-center justify-between">
-      <h1 class="m-0 flex items-center gap-2 text-title font-normal">
+      <h1 class="flex items-center gap-2 text-title font-normal">
         <Logo />
         <a href="/" class="inline-flex flex-col leading-tight">
           <span class="tracking-tight">
@@ -282,7 +304,7 @@ export function AppHeader({
           <Button
             variant="ghost"
             size="md-compact"
-            class="rounded-r-none"
+            class="rounded-r-none border-r-0"
             data-toolbar-item
             tabIndex={-1}
             onClick={theme.toggle}
@@ -296,13 +318,14 @@ export function AppHeader({
             buttonClass={buttonClass({
               variant: "ghost",
               size: "md-compact",
+              design,
               class: "self-stretch rounded-l-none border-l",
             })}
             tabIndex={-1}
             toolbarItem
             label={s.header.themeOptions}
           >
-            {(close) => <ThemeOptions theme={theme} onPick={close} />}
+            {() => <ThemeOptions theme={theme} />}
           </SplitMenu>
         </span>
         <span class="relative">
@@ -356,7 +379,7 @@ export function AppHeader({
                   <ThemeOptions theme={theme} itemClass="pl-6.5" />
                 </div>
               )}
-              <hr class="m-0 border-t md:hidden" />
+              <hr class="md:hidden" />
               {onKeyboardHelp && (
                 <MenuItem desktopOnly onClick={pick(onKeyboardHelp)}>
                   {s.keyboard.title}
