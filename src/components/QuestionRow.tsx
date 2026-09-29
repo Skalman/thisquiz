@@ -54,8 +54,7 @@ export const QuestionRow = memo(
     defaultFocus,
     onOptionClick,
   }: Props) {
-    const labels = question.options;
-    const isLong = labels.some((l) => l.length > LONG_THRESHOLD);
+    const isLong = question.options.some((option) => option.label.length > LONG_THRESHOLD);
     const hasCorrect = marks.indexOf("correct") >= 0;
 
     return (
@@ -76,12 +75,12 @@ export const QuestionRow = memo(
             isLong ? "flex-col gap-1 *:whitespace-normal" : "gap-1",
           )}
         >
-          {question.options.map((_label, oi) => (
+          {question.options.map((option, oi) => (
             <OptionButton
               key={LETTERS[oi]}
               index={oi}
               questionIndex={index}
-              label={labels[oi]}
+              label={option.label}
               mark={marks[oi]}
               implied={hasCorrect && marks[oi] === "unmarked"}
               disabled={disabled || (hasCorrect && marks[oi] !== "correct")}

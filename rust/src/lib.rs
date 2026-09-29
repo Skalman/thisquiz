@@ -146,11 +146,19 @@ mod wasm_api {
         focus_qis: Vec<usize>,
     }
 
-    /// One question's rendered board text: the prompt and one label per option.
+    /// One question's rendered board text: the prompt and its options.
     #[derive(Serialize)]
     struct BoardQuestionApi {
         text: String,
-        options: Vec<String>,
+        options: Vec<BoardOptionApi>,
+    }
+
+    /// One option's label, and what it stands for.
+    #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct BoardOptionApi {
+        label: String,
+        label_kind: render::OptionLabelKind,
     }
 
     fn action_to_api(a: DeduceAction) -> DeduceActionApi {
@@ -369,7 +377,7 @@ mod wasm_api {
                     let options = (0..fp.option_count)
                         .map(|oi| {
                             let ov = fp.options[qi][oi];
-                            match (qt, fp.true_stmt_question_types.as_ref()) {
+                            let label = match (qt, fp.true_stmt_question_types.as_ref()) {
                                 (QuestionType::TrueStmt, Some(types)) => {
                                     render::claim_label(&Claim {
                                         question_type: types[oi],
@@ -377,6 +385,10 @@ mod wasm_api {
                                     })
                                 }
                                 _ => render::option_label(qt, ov),
+                            };
+                            BoardOptionApi {
+                                label,
+                                label_kind: render::option_label_kind(qt, ov),
                             }
                         })
                         .collect();

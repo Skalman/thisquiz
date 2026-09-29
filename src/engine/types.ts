@@ -30,5 +30,13 @@ export interface Puzzle {
 /** One question's board text, rendered by Rust via `PuzzleHandle.renderBoard`. */
 export interface RenderedQuestion {
   text: string;
-  options: string[];
+  options: RenderedOption[];
 }
+
+/** One option's rendered label, and what it stands for, so the board can decorate it. */
+export interface RenderedOption {
+  label: string;
+  labelKind: OptionLabelKind;
+}
+
+export type OptionLabelKind = "letter" | "question" | "count" | "pair" | "claim" | "none";

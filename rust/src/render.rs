@@ -93,6 +93,57 @@ pub fn question_text(qt: &QuestionType) -> String {
     }
 }
 
+/// What an option's label stands for, for the frontend to decorate it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum OptionLabelKind {
+    Letter,
+    Question,
+    /// A count, or a distance.
+    Count,
+    /// Two consecutive questions.
+    Pair,
+    /// The claim a TrueStmt option carries.
+    Claim,
+    /// No value: `NONE`, labeled "None".
+    None,
+}
+
+/// The [`OptionLabelKind`] of one option `value` of `qt`.
+pub fn option_label_kind(qt: &QuestionType, ov: OptionValue) -> OptionLabelKind {
+    use QuestionType::*;
+    match qt {
+        TrueStmt => OptionLabelKind::Claim,
+        _ if !ov.is_num() => OptionLabelKind::None,
+        AnswerOf { .. }
+        | LeastCommon
+        | MostCommon
+        | NoOtherHasAnswer
+        | AnswerIsSelf
+        | EqualCount { .. } => OptionLabelKind::Letter,
+        ConsecIdent => OptionLabelKind::Pair,
+        ClosestAfter { .. }
+        | ClosestBefore { .. }
+        | FirstWith { .. }
+        | LastWith { .. }
+        | PrevSame
+        | NextSame
+        | OnlySame
+        | OnlySameAmong
+        | OnlySameAsAmong { .. }
+        | OnlySameAs { .. }
+        | OnlyOdd { .. }
+        | OnlyEven { .. } => OptionLabelKind::Question,
+        CountAnswer { .. }
+        | CountAnswerBefore { .. }
+        | CountAnswerAfter { .. }
+        | CountVowel
+        | CountConsonant
+        | MostCommonCount
+        | LetterDist { .. } => OptionLabelKind::Count,
+    }
+}
+
 /// The label for one option `value` of `qt`. `NONE`/`UNUSED` render as the
 /// type's empty marker ("None", or "?" for letter-valued types); `TrueStmt`
 /// rows carry claim text instead (see [`claim_label`]) so their label is empty.
@@ -294,6 +345,50 @@ mod tests {
         assert_eq!(option_label(&CountVowel, OptionValue::NONE), "None");
         // TrueStmt row has no plain label.
         assert_eq!(option_label(&TrueStmt, num(0)), "");
+    }
+
+    /// One case per label kind, plus `NONE` on a letter-valued type.
+    #[test]
+    fn option_label_kind_names_each_value_shape() {
+        use QuestionType::*;
+        let num = OptionValue::num;
+        let cases = [
+            (
+                AnswerOf { question_index: 0 },
+                num(1),
+                OptionLabelKind::Letter,
+            ),
+            (
+                EqualCount { answer: Answer::A },
+                num(1),
+                OptionLabelKind::Letter,
+            ),
+            (
+                EqualCount { answer: Answer::A },
+                OptionValue::NONE,
+                OptionLabelKind::None,
+            ),
+            (
+                FirstWith { answer: Answer::A },
+                num(4),
+                OptionLabelKind::Question,
+            ),
+            (
+                FirstWith { answer: Answer::A },
+                OptionValue::NONE,
+                OptionLabelKind::None,
+            ),
+            (
+                CountAnswer { answer: Answer::B },
+                num(0),
+                OptionLabelKind::Count,
+            ),
+            (ConsecIdent, num(3), OptionLabelKind::Pair),
+            (TrueStmt, num(0), OptionLabelKind::Claim),
+        ];
+        for (qt, ov, want) in cases {
+            assert_eq!(option_label_kind(&qt, ov), want, "{qt:?} {ov:?}");
+        }
     }
 
     #[test]

@@ -21,6 +21,10 @@ A puzzle is a grid: `n` **questions** down, `option_count` **options** across.
 - **option value** — `OptionValue`: what an option *means* rather than what letter it is.
   A number — a question index, a count, a letter index, a distance, depending on the
   question type — or `NONE` for "no such question".
+- **option label kind** — `render::OptionLabelKind`: what an option's label stands for —
+  a letter, a question, a count, a consecutive pair, a `TrueStmt` option's claim, or
+  no value (`NONE`), labeled "None". Sent with the rendered board so the frontend can
+  decorate labels.
 - **mark** — what the player has put on a cell: correct, incorrect, or blank. The engine
   sees marks as `State`'s `answers` (one per question) plus `eliminated` (a bitmask of
   options per question); `deriveState()` in `src/engine/state.ts` does the conversion.

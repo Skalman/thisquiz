@@ -34,12 +34,13 @@ export function PrintSheet({
                 <div
                   class={classNames(
                     "print:flex print:flex-wrap print:pl-[1.2em]",
-                    q.options.some((l) => l.length > 12) && "print:flex-col print:gap-[0.1em]",
+                    q.options.some((option) => option.label.length > 12) &&
+                      "print:flex-col print:gap-[0.1em]",
                   )}
                 >
-                  {q.options.map((label, oi) => (
+                  {q.options.map((option, oi) => (
                     <span key={LETTERS[oi]} class="print:min-w-[5em] print:flex-1">
-                      {LETTERS[oi]}. {label}
+                      {LETTERS[oi]}. {option.label}
                     </span>
                   ))}
                 </div>
