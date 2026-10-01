@@ -16,11 +16,14 @@ const TAB_ICON = tw`mr-[0.25em] inline-flex align-middle`;
 /** The row of tabs, scrolling sideways without a scrollbar. */
 const TABLIST = tw`mb-2 flex overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden`;
 
+/** Fades each end over 1rem, within its padding, which is empty at rest. */
+const EDGE_FADES = tw`mask-[linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%-1rem),transparent)]`;
+
 /** The row's look: zen's trough, play's bare row. */
 const TABLIST_LOOK: Record<Design, string> = {
   zen: tw`rounded-lg bg-hover p-0.5`,
-  // Bottom padding keeps the lips unclipped.
-  play: tw`gap-1.5 px-0.5 pt-1 pb-2`,
+  // Scrolls out to the screen's edges; bottom padding keeps the lips unclipped.
+  play: tw`-mx-safe-4 gap-1.5 px-safe-4 pt-1 pb-2 ${EDGE_FADES}`,
 };
 
 /** A tab: its share of the row, and its one-line label. */

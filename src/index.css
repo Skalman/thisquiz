@@ -262,6 +262,17 @@
   padding-left: max(var(--safe-area-inset-left), --spacing(--value(integer)));
 }
 
+/* p-safe-*'s side padding alone, and its negation as a margin: together,
+   -mx-safe-4 px-safe-4 spans the page's padding with content where it was. */
+@utility px-safe-* {
+  padding-left: max(var(--safe-area-inset-left), --spacing(--value(integer)));
+  padding-right: max(var(--safe-area-inset-right), --spacing(--value(integer)));
+}
+@utility -mx-safe-* {
+  margin-left: calc(-1 * max(var(--safe-area-inset-left), --spacing(--value(integer))));
+  margin-right: calc(-1 * max(var(--safe-area-inset-right), --spacing(--value(integer))));
+}
+
 /* Offsets that clear the safe-area insets, like p-safe-*: top-safe-4 is
    max(inset, 1rem). */
 @utility top-safe-* {
