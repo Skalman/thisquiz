@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "preact/hooks";
+import { useState, useEffect, useCallback, useMemo, useRef } from "preact/hooks";
 import { useForceUpdate, useRevalidated } from "./lib/hooks.ts";
 import { LocationProvider, Router, Route, useLocation } from "preact-iso";
 import { tinykeys } from "tinykeys";
@@ -20,6 +20,18 @@ import {
 import { dayStates, resumeLevel } from "./puzzles/progress.ts";
 import { useToday } from "./lib/today.ts";
 import { decodePlaygroundHash } from "./lib/playground.ts";
+import {
+  TUTORIAL_PUZZLES,
+  TUTORIAL_ID,
+  markTutorialDone,
+  tutorialDone,
+  tutorialOpener,
+} from "./puzzles/tutorial.ts";
+import { hasAnyProgress } from "./lib/store.ts";
+import { isCrawler } from "./lib/crawler.ts";
+import { track, getClientInfo } from "./lib/analytics.ts";
+import { Button } from "./components/ui/Button.tsx";
+import { TutorialOpening } from "./components/TutorialOpening.tsx";
 import { guarded } from "./lib/keyboard.ts";
 import { t } from "./i18n/index.ts";
 import { replayLogoAnimation } from "./components/Logo.tsx";
@@ -43,7 +55,85 @@ adoptDebugParam();
 
 function DailyPage() {
   const dateStr = useToday();
+  const { route } = useLocation();
+  // A device with no progress and no finished tutorial starts there; deep
+  // links land where they point, and crawlers index the day.
+  const [toTutorial] = useState(() => !tutorialDone() && !hasAnyProgress() && !isCrawler());
+  useEffect(() => {
+    if (toTutorial) route("/tutorial", true);
+  }, [toTutorial, route]);
+  if (toTutorial) return <Loading />;
   return <DayView dateStr={dateStr} />;
+}
+
+/**
+ * The guided tutorial, without the app's chrome: a lone cell, then its fixed
+ * puzzles in turn; finishing or skipping goes to today.
+ */
+function TutorialRoute() {
+  const s = t();
+  const { route } = useLocation();
+  // 0 is the lone cell; the puzzles follow.
+  const [stage, setStage] = useState(0);
+  const script = stage > 0 ? TUTORIAL_PUZZLES[stage - 1] : null;
+  const last = stage === TUTORIAL_PUZZLES.length;
+  // The last puzzle solved: nothing left to skip.
+  const [finished, setFinished] = useState(false);
+  const puzzle = useMemo(
+    () => (script ? { ...parseCompactPuzzle(script.compact), id: TUTORIAL_ID } : null),
+    [script],
+  );
+  // Back to `to`: a step back when a link opened the tutorial from there.
+  const leaveFor = (to: string | null) => {
+    if (to !== null && to === tutorialOpener()) window.history.back();
+    else route(to ?? "/", true);
+  };
+  const next = () => (last ? leaveFor("/") : setStage(stage + 1));
+  function skip() {
+    markTutorialDone();
+    track("tutorial_skipped", getClientInfo());
+    leaveFor(tutorialOpener());
+  }
+  function solved() {
+    if (!last) return;
+    markTutorialDone();
+    track("tutorial_completed", getClientInfo());
+    setFinished(true);
+  }
+  return (
+    // Centered in the viewport, less the page padding.
+    <div class="flex min-h-screen-safe-4 flex-col justify-center">
+      {/* Pinned to the viewport's corner, over the arrow; first in tab order. */}
+      {!finished && (
+        <Button
+          variant="ghost"
+          class="fixed top-safe-4 right-safe-4 z-10 bg-page"
+          onClick={skip}
+          data-testid="tutorial-skip"
+        >
+          {s.tutorial.skip}
+        </Button>
+      )}
+      {script && puzzle ? (
+        <PuzzleView
+          key={stage}
+          puzzle={puzzle}
+          dateStr={TUTORIAL_ID}
+          level={1}
+          ephemeral
+          tutorial={{
+            puzzle: script,
+            nextLabel: last ? s.tutorial.play : s.tutorial.next,
+            onSolved: solved,
+          }}
+          onNextPuzzle={next}
+          onChanged={() => {}}
+        />
+      ) : (
+        <TutorialOpening onNext={next} />
+      )}
+    </div>
+  );
 }
 
 function DayView({ dateStr, initialLevel }: { dateStr: string; initialLevel?: number }) {
@@ -315,6 +405,12 @@ function NotFound() {
   );
 }
 
+/** The page footer, left off the tutorial. */
+function Footer() {
+  const { path } = useLocation();
+  return path === "/tutorial" ? null : <PageFooter />;
+}
+
 export function App() {
   const design = useStoredDesign();
   return (
@@ -328,10 +424,11 @@ export function App() {
             <Route path="/past" component={ArchiveRedirect} />
             <Route path="/sync" component={SyncRoute} />
             <Route path="/playground" component={PlaygroundRoute} />
+            <Route path="/tutorial" component={TutorialRoute} />
             <Route path="/:date/:level" component={DayRoute} />
             <Route default component={NotFound} />
           </Router>
-          <PageFooter />
+          <Footer />
           {import.meta.env.DEV && <SafeAreaSimulator />}
         </div>
       </DesignContext.Provider>

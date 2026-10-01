@@ -14,6 +14,7 @@ import { SplitMenu } from "./SplitMenu.tsx";
 import { MenuItem, MenuLink, MenuPopover } from "./ui/Menu.tsx";
 import { Button, ButtonLink, buttonClass } from "./ui/Button.tsx";
 import { t } from "../i18n/index.ts";
+import { noteTutorialOpener } from "../puzzles/tutorial.ts";
 import { arrowNavHandler, menuNavHandler } from "../lib/keyboard.ts";
 import { classNames, tw } from "../lib/classNames.ts";
 import { storeDesign } from "../lib/design.ts";
@@ -389,6 +390,15 @@ export function AppHeader({
                 </MenuItem>
               )}
               {onPrint && <MenuItem onClick={pick(onPrint)}>{s.daily.printAll}</MenuItem>}
+              <MenuLink
+                href="/tutorial"
+                onClick={() => {
+                  noteTutorialOpener();
+                  setMoreMenu(false);
+                }}
+              >
+                {s.tutorial.title}
+              </MenuLink>
               <MenuItem onClick={pick(onBackup)}>{s.backup.button}</MenuItem>
             </MenuPopover>
           )}

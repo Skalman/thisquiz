@@ -198,7 +198,7 @@ invalid_reasons! {
 impl InvalidReason {
     /// Which questions this reason argues from — its own `at` fields, nothing
     /// else. A hint derives its highlight from here rather than tracking one
-    /// alongside, so the two can't drift: a stale list would aim the coach at a
+    /// alongside, so the two can't drift: a stale list would aim the hint at a
     /// question the prose never mentions.
     ///
     /// A pair reason names two questions, `at` and `at + 1`, and returns both.

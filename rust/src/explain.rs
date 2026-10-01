@@ -31,7 +31,7 @@ pub enum ExplainStep {
         lines: Vec<String>,
     },
     /// A "look at these questions" pointer (0-based). The frontend renders the
-    /// prose; `focus_questions` reads these for the coach's focus/arrows.
+    /// prose; `focus_questions` reads these.
     Look {
         qis: Vec<usize>,
     },
@@ -47,8 +47,7 @@ fn complex(header: String, lines: Vec<String>) -> ExplainStep {
 
 /// The questions an explanation sends the solver to look at (0-based, sorted) —
 /// the full set from its last `Look` step: every question the deduction reads,
-/// not just where the mark lands. Empty if it has no `Look`. The L1 coach names
-/// and points its arrows at these.
+/// not just where the mark lands. Empty if it has no `Look`.
 pub fn focus_questions(steps: &[ExplainStep]) -> Vec<usize> {
     let mut refs = steps
         .iter()
@@ -2051,7 +2050,7 @@ pub fn explain_lookahead(
     // Every question the hint's lines name: the assumption, each step's own targets, and
     // the questions each step's *reason* argues from. That last group comes from the
     // reason itself, never from a list maintained alongside it — a stale list would aim
-    // the coach at a question the prose never mentions.
+    // the hint at a question the prose never mentions.
     let mut involved: BTreeSet<usize> = BTreeSet::from([qi]);
     let mut lines: Vec<String> = Vec::new();
 
@@ -2160,7 +2159,7 @@ mod tests {
         );
         // Single Look step.
         assert_eq!(focus_questions(&[try_looking(&[2])]), vec![2]);
-        // No Look step → empty (the coach falls back to the action's target).
+        // No Look step → empty.
         assert_eq!(
             focus_questions(&[simple("#3 must be A.".into())]),
             Vec::<usize>::new()

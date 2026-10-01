@@ -11,8 +11,8 @@ use refpuzzle::explain::{ExplainStep, explain_deduce, explain_lookahead, focus_q
 use refpuzzle::lookahead::lookahead_shortest;
 use refpuzzle::solve_deduce::VERIFY_ITERS_PER_QUESTION;
 
-/// One hint as a line: first the questions its last `Look` step points at (where
-/// the L1 coach aims its arrows), then the prose from its text steps. The
+/// One hint as a line: first the questions its last `Look` step points at, then
+/// the prose from its text steps. The
 /// highlight can move while the wording holds still, so the line carries both.
 fn render_hint(steps: &[ExplainStep]) -> String {
     let look = focus_questions(steps)

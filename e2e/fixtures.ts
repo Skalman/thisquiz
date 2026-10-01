@@ -48,6 +48,8 @@ export const test = base.extend({
     await page.addInitScript(() => {
       // Otherwise the how-to-play block auto-expands and reflows the page mid-test.
       localStorage.setItem("refpuzzle:onboarded", "1");
+      // Otherwise a bare front-page visit is routed into the tutorial.
+      localStorage.setItem("refpuzzle:tutorial", "1");
       localStorage.setItem("refpuzzle:theme", "light");
     });
     await use(page);

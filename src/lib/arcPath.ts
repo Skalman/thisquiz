@@ -31,3 +31,8 @@ export function arcPath(x1: number, y1: number, x2: number, y2: number, head: bo
   }
   return d;
 }
+
+/** An arrow's start x, pulled in so it slants no more than 45°. */
+export function within45(x: number, targetX: number, drop: number): number {
+  return Math.min(Math.max(x, targetX - drop), targetX + drop);
+}

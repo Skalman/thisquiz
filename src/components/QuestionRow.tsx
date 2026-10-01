@@ -123,6 +123,7 @@ export const QuestionRow = memo(
       >
         <div
           class={`row-span-full shrink-0 self-stretch ${BAR[design]} ${VALIDITY_BAR[validity]}`}
+          data-validity-bar
         />
         <div class={`col-start-2 ${HEADING[design]}`}>
           {design === "play" ? (

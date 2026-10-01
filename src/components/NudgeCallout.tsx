@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
-import { arcPath } from "../lib/arcPath.ts";
+import { arcPath, within45 } from "../lib/arcPath.ts";
 import { classNames } from "../lib/classNames.ts";
 import { COACH_ARROW, COACH_ARROW_OUTLINE, COACH_SVG, COACH_TEXT } from "./coachStyles.ts";
 
@@ -76,7 +76,7 @@ export function NudgeCallout({
     let x = buttonX + side * LEAN;
     x = Math.min(Math.max(x, half + EDGE), origin.width - half - EDGE);
     // Never past 45°: a wide clamp would otherwise flatten the arrow out.
-    x = Math.min(Math.max(x, buttonX - GAP), buttonX + GAP);
+    x = within45(x, buttonX, GAP);
     const y = buttonY - GAP;
 
     setPlacement({ x, y: y - textEl.offsetHeight, path: arcPath(x, y, buttonX, buttonY, true) });

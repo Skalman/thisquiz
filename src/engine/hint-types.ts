@@ -25,6 +25,6 @@ export type ExplainStep =
 export interface SolveStep {
   action: DeduceAction;
   explain: ExplainStep[];
-  /** 0-based questions to look at, for the L1 coach's arrows. */
+  /** 0-based questions the step reads. */
   focusQis: number[];
 }

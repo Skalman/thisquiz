@@ -22,16 +22,19 @@ import {
   lastCheckpointIdx,
 } from "./HistoryStrip.tsx";
 import { questionOutcomes, storedSolveStats } from "../lib/solve-summary.ts";
-import { CoachText } from "./CoachText.tsx";
-import { CoachArrows } from "./CoachArrows.tsx";
+import { TutorialArrow } from "./TutorialArrow.tsx";
 import { NudgeCallout } from "./NudgeCallout.tsx";
-import { useL1Coach } from "./useL1Coach.ts";
 import { useForceUpdate, useVisibleTimeout } from "../lib/hooks.ts";
 import { useAnalytics } from "./useAnalytics.ts";
 import { useHintEngine } from "./useHintEngine.ts";
 import { PuzzleShareDialog, type ShareMode } from "./PuzzleShareDialog.tsx";
 import { SolvedDialog } from "./SolvedDialog.tsx";
 import { useIdleNudge } from "./useIdleNudge.ts";
+import { useTutorial } from "./useTutorial.ts";
+import { confetti } from "../lib/confetti.ts";
+import { TutorialNext, TutorialPanel } from "./TutorialPanel.tsx";
+import { noteTutorialOpener, type TutorialPuzzle } from "../puzzles/tutorial.ts";
+import { ButtonLink } from "./ui/Button.tsx";
 import {
   CheckpointNote,
   CompletionBar,
@@ -145,6 +148,13 @@ interface PuzzleViewProps {
   ephemeral?: boolean;
   /** Filled with the view's share dialog, for the page's Share menu item to open. */
   shareRef?: { current: { open: () => void } | null };
+  /** Tutorial mode: only the step's cells take presses; controls, history and hints are off. */
+  tutorial?: {
+    puzzle: TutorialPuzzle;
+    /** The label of the Next button, which calls `onNextPuzzle`. */
+    nextLabel: string;
+    onSolved: () => void;
+  };
   onNextPuzzle: () => void;
   onChanged: () => void;
 }
@@ -156,6 +166,7 @@ export function PuzzleView({
   initialHash,
   ephemeral,
   shareRef,
+  tutorial,
   onNextPuzzle,
   onChanged,
 }: PuzzleViewProps) {
@@ -461,23 +472,12 @@ export function PuzzleView({
 
   const completed = validity.length > 0 && validity.every(isValid);
 
-  // L1-only ambient coach: calm intro text, idle nudges, and mistake notes,
-  // with reference arrows. Silent the instant the player engages. Replaces the
-  // old auto-solve tutorial; higher levels and playground get nothing.
-  const coachEnabled = level === 1 && !ephemeral;
-  const coachTextRef = useRef<HTMLDivElement>(null);
-  // Held steady between marks so the overlay's geometry effect can depend on it.
-  const coachMarks = useMemo(() => questions.map((q) => q.marks), [questions]);
-  const coach = useL1Coach(puzzle, {
-    enabled: coachEnabled,
-    handleRef,
-    handleReady,
-    questions,
-    started: historyRef.current.length > 1,
-    completed,
-    // Coach hints land on the history track + hint count, like the Hint button.
-    onHint: pushHintMarker,
-  });
+  // The tutorial panel; its arrow starts here.
+  const tutorialPanelRef = useRef<HTMLDivElement>(null);
+  // Stable between marks, for the tutorial's memo.
+  const boardMarks = useMemo(() => questions.map((q) => q.marks), [questions]);
+  const script = useTutorial(tutorial?.puzzle ?? null, boardMarks, completed);
+
   const canUndo = historyIdxRef.current > 0;
   const canRedo = historyIdxRef.current < historyRef.current.length - 1;
 
@@ -492,7 +492,8 @@ export function PuzzleView({
 
   function applyChange(next: QuestionState[]) {
     interactedRef.current = true;
-    analytics.markStarted();
+    // Puzzle starts are tracked outside the tutorial.
+    if (!tutorial) analytics.markStarted();
     pushHistory(next);
     setQuestions(next);
     revalidate(next);
@@ -566,6 +567,11 @@ export function PuzzleView({
     if (completed) {
       refuse();
       setReplayCue((n) => n + 1);
+      return;
+    }
+    // A tutorial press off its step bounces.
+    if (script && !script.acceptsPress(questionIdx, optionIdx)) {
+      refuse();
       return;
     }
     const verified = checkpointBoard();
@@ -659,9 +665,9 @@ export function PuzzleView({
       historyRef.current[historyIdxRef.current],
     ).qi >= 0;
 
-  // L2+ only: the playground is level 1, and L1 has the coach instead.
+  // Daily puzzles only.
   const nudge = useIdleNudge({
-    enabled: level > 1 && hasProgress && !completed,
+    enabled: !ephemeral && hasProgress && !completed,
     canCheckpoint,
     progressKey: questions,
   });
@@ -755,6 +761,13 @@ export function PuzzleView({
       analytics.wasCompleted.current = true;
       return undefined;
     }
+    // A tutorial solve reports to the tutorial.
+    if (tutorial) {
+      analytics.wasCompleted.current = true;
+      confetti();
+      tutorial.onSolved();
+      return undefined;
+    }
     // The counters stay on the ledger past the solve, for the summary; this
     // lands the last stretch of time.
     finishClock();
@@ -774,7 +787,7 @@ export function PuzzleView({
     });
     setSolvedDialog("celebrate");
     return undefined;
-  }, [completed, level, puzzle.id, analytics.meta, analytics.wasCompleted, finishClock]);
+  }, [completed, level, puzzle.id, analytics.meta, analytics.wasCompleted, finishClock, tutorial]);
 
   // Re-seed the toolbar's roving tabindex whenever its enabled set changes;
   // between those the arrow keys' own position stands.
@@ -787,6 +800,14 @@ export function PuzzleView({
   useEffect(() => {
     initRovingTabindex(historyStripRef.current, ENABLED_HISTORY_STEP);
   });
+
+  // A tutorial puzzle takes focus as it appears, from the Next that led here.
+  const inTutorial = tutorial !== undefined;
+  useEffect(() => {
+    if (!inTutorial) return;
+    setFocusedQuestion(0);
+    setFocusedOption(0);
+  }, [inTutorial]);
 
   // Scroll focused question into view
   useEffect(() => {
@@ -810,7 +831,7 @@ export function PuzzleView({
     const qi = focusedQuestionRef.current ?? 0;
     const oi = focusedOptionRef.current ?? 0;
     const nextQi = (qi + questionDelta + questionCount) % questionCount;
-    let nextOi = (oi + optionDelta + 5) % 5;
+    let nextOi = (oi + optionDelta + puzzle.optionCount) % puzzle.optionCount;
     // When moving between questions, snap to the correct option if the
     // target option is disabled (another option is marked correct)
     if (questionDelta !== 0) {
@@ -911,6 +932,7 @@ export function PuzzleView({
     moveFocus,
     hint: handleHint,
     completed,
+    optionCount: puzzle.optionCount,
   };
   const keyActionsRef = useRef(keyActions);
   keyActionsRef.current = keyActions;
@@ -930,33 +952,42 @@ export function PuzzleView({
       });
 
     const bindings: Record<string, (ev: KeyboardEvent) => void> = {
-      h: whileSolving(() => keyActionsRef.current.hint()),
-      p: whileSolving(() => keyActionsRef.current.checkpoint()),
       j: whileSolving(() => keyActionsRef.current.moveFocus(1, 0)),
       k: whileSolving(() => keyActionsRef.current.moveFocus(-1, 0)),
-      "$mod+z": undoRedo(() => keyActionsRef.current.undo()),
-      "$mod+Shift+z": undoRedo(() => keyActionsRef.current.redo()),
-      "$mod+y": undoRedo(() => keyActionsRef.current.redo()),
+      // The tutorial has no history, checkpoints or hints.
+      ...(inTutorial
+        ? {}
+        : {
+            h: whileSolving(() => keyActionsRef.current.hint()),
+            p: whileSolving(() => keyActionsRef.current.checkpoint()),
+            "$mod+z": undoRedo(() => keyActionsRef.current.undo()),
+            "$mod+Shift+z": undoRedo(() => keyActionsRef.current.redo()),
+            "$mod+y": undoRedo(() => keyActionsRef.current.redo()),
+          }),
     };
-    // An option letter marks that option on the focused question; a digit feeds
-    // the question-number buffer.
+    // An option letter marks that option on the focused question, when the
+    // puzzle has it; a digit feeds the question-number buffer.
     // Also live when solved, bouncing like a press.
     OPTION_KEYS.forEach((key, oi) => {
       bindings[key] = guarded(() => {
         const qi = focusedQuestionRef.current;
-        if (qi != null) keyActionsRef.current.markOption(qi, oi);
+        const { markOption, optionCount } = keyActionsRef.current;
+        if (qi != null && oi < optionCount) markOption(qi, oi);
       });
     });
     for (let digit = 0; digit <= 9; digit++) {
       bindings[String(digit)] = whileSolving(() => keyActionsRef.current.digit(digit));
     }
     return tinykeys(window, bindings);
-  }, []);
+  }, [inTutorial]);
 
   return (
     <>
       <div class="relative">
-        {coachEnabled && !completed && <CoachText message={coach.message} boxRef={coachTextRef} />}
+        {/* Stays up once solved, so the board holds still. */}
+        {script && (
+          <TutorialPanel message={script.message} steps={script.copies} boxRef={tutorialPanelRef} />
+        )}
         {/* Questions */}
         <div
           ref={gridRef}
@@ -995,13 +1026,12 @@ export function PuzzleView({
           ))}
         </div>
 
-        {coachEnabled && !completed && (
-          <CoachArrows
-            message={coach.message}
+        {script && (
+          <TutorialArrow
+            arrow={script.arrow}
+            arrowKey={script.arrowKey}
             gridRef={gridRef}
-            textRef={coachTextRef}
-            marks={coachMarks}
-            optionCount={puzzle.optionCount}
+            textRef={tutorialPanelRef}
           />
         )}
 
@@ -1016,9 +1046,15 @@ export function PuzzleView({
         )}
 
         {/* Stuck to the viewport's bottom while the board's tail is below it; z-index
-            clears the coach overlay. The negative top margin lays its border over the
-            last row's own; the bottom padding covers the safe-area inset only while stuck. */}
-        <div class="sticky bottom-0 z-6 -mt-px -mb-(--safe-area-inset-bottom) border-t bg-page pb-(--safe-area-inset-bottom)">
+            clears the tutorial's arrow. The negative top margin lays its border over the
+            last row's own; the bottom padding covers the safe-area inset only while stuck.
+            The tutorial's dock holds only Next, so it goes unruled. */}
+        <div
+          class={classNames(
+            "sticky bottom-0 z-6 -mt-px -mb-(--safe-area-inset-bottom) bg-page pb-(--safe-area-inset-bottom)",
+            !tutorial && "border-t",
+          )}
+        >
           {/* Hint display */}
           {!completed && debugMode && hints.debugHints && (
             <DebugHintPanel steps={hints.debugHints} />
@@ -1038,7 +1074,7 @@ export function PuzzleView({
               short; a long track wraps onto its own. Solved, the controls go
               and the completion bar stands at the row's end instead. */}
           <div class="flex flex-wrap items-center gap-x-3">
-            {!completed && (
+            {!completed && !tutorial && (
               <PuzzleControls
                 toolbarRef={controlsRef}
                 checkpointRef={checkpointBtnRef}
@@ -1054,7 +1090,7 @@ export function PuzzleView({
               />
             )}
 
-            {historyRef.current.length > 1 && (
+            {historyRef.current.length > 1 && !tutorial && (
               <HistoryStrip
                 history={historyRef.current}
                 currentIdx={historyIdxRef.current}
@@ -1066,9 +1102,14 @@ export function PuzzleView({
               />
             )}
 
+            {tutorial && (
+              <div class="ms-auto flex flex-none items-center py-2">
+                <TutorialNext shown={completed} label={tutorial.nextLabel} onClick={onNextPuzzle} />
+              </div>
+            )}
             {/* The completion bar: the ways onward, at the end of the row.
                 The dialog carries its last two while it is up. */}
-            {completed && (
+            {completed && !tutorial && (
               <CompletionBar
                 barRef={puzzleCompleteRef}
                 nextRef={setNextPuzzleRef}
@@ -1079,6 +1120,20 @@ export function PuzzleView({
                 onSummary={() => setSolvedDialog("summary")}
                 onNext={onNextPuzzle}
               />
+            )}
+
+            {/* The Intro puzzle's way to the tutorial, on a line of its own. */}
+            {level === 1 && !ephemeral && !completed && (
+              <div class="basis-full pb-2">
+                <ButtonLink
+                  variant="outline"
+                  href="/tutorial"
+                  onClick={noteTutorialOpener}
+                  data-testid="take-tutorial"
+                >
+                  {s.tutorial.takeIt} &rarr;
+                </ButtonLink>
+              </div>
             )}
           </div>
         </div>

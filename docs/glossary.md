@@ -13,8 +13,8 @@ A puzzle is a grid: `n` **questions** down, `option_count` **options** across.
 
   Never a synonym for a question. A question runs out of options; a cell does not
   "empty". A force resolves a question, not a cell. Say "question" unless both
-  coordinates are meant. The frontend keeps the distinction explicit —
-  `CoachArrows.tsx` picks `cell(qi, oi)` or `row(qi)` by whether it has an `oi`.
+  coordinates are meant. The frontend keeps the distinction explicit — a row
+  carries `data-row`, a cell `data-qi` and `data-oi`.
 - **row** — all of one question's cells. Frontend term (the grid line a question
   occupies); Rust just says "question".
 - **answer** — the option a question resolves to, as a letter: `Answer`.
@@ -64,7 +64,10 @@ A puzzle is a grid: `n` **questions** down, `option_count` **options** across.
 - **perfect** — every question clean. The result card then adds the all-green
   caption under the squares. *Clean* is about one question, *perfect* the board.
 - **nudge** — an idle callout pointing at Checkpoint or Hint for a solver who is
-  active but stuck. L2 and up; L1 has the coach instead.
+  active but stuck. Daily puzzles only.
+- **tutorial** — the guided walk at `/tutorial`: a lone cell pressed through its
+  marks, then a few tiny fixed puzzles, each a short script of steps.
+  Frontend-only.
 - **result card** — the shareable picture of a solve: level, day, time, and one
   square per question in its outcome's color.
 - **completion bar** — the row of ways onward that replaces the controls in the dock

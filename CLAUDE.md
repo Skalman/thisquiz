@@ -33,9 +33,12 @@
   frontend-side from structured wire data (e.g. hint `Look` → `hint.tryLooking`).
 - TS engine survivors in `src/engine/`: `state.ts` (mark derivation),
   `types.ts` (Puzzle/marks types + letter helpers), `hint-types.ts` (hint wire
-  types), `coach-types.ts` (L1 in-play coach arrow/message types).
+  types).
 - Puzzle data in `public/puzzles/daily/<year>.json` (compact form, parsed
   by wasm; the frontend hands the blob to Rust rather than expanding it).
 - Year JSON missing or doesn't contain the date → wasm generates on the
   fly in `src/puzzles/daily.ts::fetchDaily`.
 - All UI strings in src/i18n/ (English only for now)
+- The guided tutorial (`src/puzzles/tutorial.ts`) is the one place the frontend
+  scripts puzzle reasoning: its puzzles are fixed and tiny, so its copy is
+  hand-written in i18n. Board text still comes from Rust.

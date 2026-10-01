@@ -5,7 +5,6 @@ import init, {
 import type { Puzzle, RenderedQuestion, Marks, Answer } from "../engine/types.ts";
 import { L2I } from "../engine/types.ts";
 import type { SolveStep } from "../engine/hint-types.ts";
-import type { ArrowReferent } from "../engine/coach-types.ts";
 import type { Validity } from "../engine/state.ts";
 import {
   V_NEUTRAL,
@@ -58,17 +57,11 @@ export interface PuzzleHandle {
   /**
    * The next solving step — a deduction, else the shortest lookahead
    * contradiction — plus its explanation, from the derived state directly.
-   * Null when the puzzle is solved or stuck. The hint UI renders `explain`; the
-   * L1 coach also reads `action`/`focusQis`.
+   * Null when the puzzle is solved or stuck. The hint UI renders `explain`.
    */
   nextStep(answers: (Answer | null)[], eliminated: number[]): SolveStep | null;
   /** Rendered board text — prompt + option labels for every question. */
   renderBoard(): RenderedQuestion[];
-  /**
-   * What an L1 hint arrow points at for each question — resolved from the
-   * question type, so `null` for kinds L1 never uses. Used only by the L1 coach.
-   */
-  referents(): (ArrowReferent | null)[];
   free(): void;
 }
 
@@ -134,12 +127,6 @@ export function createPuzzleHandle(compact: CompactPuzzle, puzzle?: string): Puz
       return tryWasm({ op: "renderBoard", puzzle }, () => {
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion
         return wasm.renderBoard() as RenderedQuestion[];
-      });
-    },
-    referents() {
-      return tryWasm({ op: "referents", puzzle }, () => {
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-        return wasm.referents() as (ArrowReferent | null)[];
       });
     },
     free() {

@@ -53,7 +53,7 @@
      nowrap in equal-width flex cells, so this is the largest size that still
      fits at the 13px root. Do not fold it into --text-body. */
   --text-option: 0.82rem;
-  /* Content prose. The coach line's fixed height is derived from this. */
+  /* Content prose. */
   --text-body: 0.85rem;
   --text-section: 0.9rem;
   --text-dialog: 1.1rem;
@@ -85,11 +85,12 @@
       background-position-x: calc(-0.2 * var(--sweep-span) - var(--sweep-d, 0px));
     }
   }
-  /* The coach: its line fades in, a halo pulses, an arrow draws on. The nudge
+  /* The tutorial: its text fades in, its arrow draws on. The nudge
      rises into place with a small overshoot, to catch an eye that is elsewhere,
      then goes as it said its piece. */
   --animate-coach-fade-in: coach-fade-in 1.2s ease;
-  --animate-coach-pulse: coach-pulse 2.2s ease-in-out infinite;
+  /* The tutorial's Next: fades in just after the text. */
+  --animate-tutorial-next: coach-fade-in 0.6s ease 0.9s both;
   --animate-coach-draw: coach-draw 0.7s ease forwards;
   --animate-nudge-say: nudge-say 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-nudge-said: nudge-said 0.3s ease forwards;
@@ -170,15 +171,6 @@
       opacity: 1;
     }
   }
-  @keyframes coach-pulse {
-    0%,
-    100% {
-      opacity: 0.65;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
   @keyframes coach-draw {
     to {
       stroke-dashoffset: 0;
@@ -247,8 +239,6 @@
 @theme inline {
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
-  /* A thin accent edge over any surface: the coach's tally and halo. */
-  --color-accent-line: color-mix(in srgb, var(--accent) 45%, transparent);
   --color-on-accent: var(--on-accent);
   --color-valid: var(--valid);
   --color-valid-soft: var(--valid-soft);
@@ -270,6 +260,23 @@
   padding-right: max(var(--safe-area-inset-right), --spacing(--value(integer)));
   padding-bottom: max(var(--safe-area-inset-bottom), --spacing(--value(integer)));
   padding-left: max(var(--safe-area-inset-left), --spacing(--value(integer)));
+}
+
+/* Offsets that clear the safe-area insets, like p-safe-*: top-safe-4 is
+   max(inset, 1rem). */
+@utility top-safe-* {
+  top: max(var(--safe-area-inset-top), --spacing(--value(integer)));
+}
+@utility right-safe-* {
+  right: max(var(--safe-area-inset-right), --spacing(--value(integer)));
+}
+
+/* The viewport's height less p-safe-*'s top and bottom padding. */
+@utility min-h-screen-safe-* {
+  min-height: calc(
+    100svh - max(var(--safe-area-inset-top), --spacing(--value(integer))) -
+      max(var(--safe-area-inset-bottom), --spacing(--value(integer)))
+  );
 }
 
 /* A centered dialog's content padding. The box may bleed into the unsafe area;

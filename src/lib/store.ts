@@ -553,6 +553,16 @@ export function getCompletedPuzzleIds(): string[] {
   return ids;
 }
 
+/** Whether any puzzle on this device has been started. */
+export function hasAnyProgress(): boolean {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      if (localStorage.key(i)?.startsWith(PREFIX)) return true;
+    }
+  } catch {}
+  return false;
+}
+
 /** Stale is only meaningful beside solved; the counters ride along. */
 function setStale(puzzleId: string, stale: boolean): void {
   try {

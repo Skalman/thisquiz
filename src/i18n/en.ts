@@ -1,4 +1,5 @@
 import type { PointerKind } from "../lib/pointer.ts";
+import type { StepCopy, TutorialSolvedKey, TutorialStepKey } from "../puzzles/tutorial.ts";
 
 function plural(n: number, one: string, other: string): string {
   return n === 1 ? `${n} ${one}` : `${n} ${other}`;
@@ -13,7 +14,7 @@ function tapVerb(p: PointerKind): string {
 }
 
 /** A natural question list: "#1", "#1 and #3", "#1, #2 and #3". */
-export function qList(qis: number[]): string {
+function qList(qis: number[]): string {
   const labels = qis.map((qi) => `#${qi + 1}`);
   if (labels.length <= 1) return labels[0] ?? "";
   return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
@@ -111,21 +112,6 @@ export default {
     question: (qi: number) => `You made an error in #${qi + 1}.`,
     answer: (qi: number, letter: string) => `#${qi + 1} is not ${letter} — try a different answer.`,
     elim: (qi: number, letter: string) => `You incorrectly eliminated #${qi + 1} option ${letter}.`,
-  },
-  // L1 in-play coach: calm, self-fading lines shown in the board padding. `#Q`
-  // and force-vs-eliminate wording are templated from the engine's next step.
-  coach: {
-    mentalModel:
-      "Every question is about this grid's own answers — fill it so every statement comes out true.",
-    markingGesture: (p: PointerKind) =>
-      `${tapVerb(p)} once to eliminate, ${tapVerb(p).toLowerCase()} again to mark correct.`,
-    // `qs` is a pre-formatted question list, e.g. "#1 and #3".
-    lookForce: (qs: string) => `You can already pin down an answer — take a look at ${qs}.`,
-    lookEliminate: (qs: string) => `You can already eliminate an option — take a look at ${qs}.`,
-    lookGeneric: "Start with whichever question you can already work out.",
-    guidedLead: "Here's one you can get:",
-    mistakeAnswer: (q: number) => `Your answer to #${q} looks off.`,
-    mistakeElim: (q: number) => `Your elimination on #${q} looks off.`,
   },
   // Hint panel: the navigation pointer the frontend owns — deduce-rule, question,
   // and option prose all come from Rust. `qis` are 0-based question indices.
@@ -254,6 +240,46 @@ export default {
     title: "Hello!",
     // Followed by the contact address.
     body: "Found a bug or have other feedback? Feel free to say hello!",
+  },
+  // The guided tutorial's hand-written copy; board text comes from Rust.
+  tutorial: {
+    title: "Tutorial",
+    skip: "Skip tutorial",
+    // Under the Intro puzzle's controls.
+    takeIt: "Take the tutorial",
+    // The lone cell's line before each press, then once it's back to blank.
+    cellSteps: (p: PointerKind) => [
+      `This is an option. ${tapVerb(p)} it.`,
+      `Eliminated. That's how you rule out an option. ${tapVerb(p)} it again.`,
+      `Your answer. That's how you choose one. ${tapVerb(p)} it once more.`,
+      "Cleared, back where it started.",
+    ],
+    // A `lead` renders on its own line above `text`.
+    steps: (p: PointerKind): Record<TutorialStepKey, StepCopy> => ({
+      meetQuestion: {
+        lead: "Here's a question. Read it!",
+        text: "Questions here always ask about the puzzle's own answers.",
+      },
+      validityBar: {
+        lead: "This is the validity bar. Can this question still work out with your marks?",
+        text: `With A eliminated, #1 has no option left, so it's red. The bar only reflects your marks right now. ${tapVerb(p)} A again to fix it.`,
+      },
+      askSelf: { text: "Your turn!" },
+      tryThree: { text: "Three options this time. Can you figure it out?" },
+      tryTwo: { text: "Now two questions! They can ask about each other." },
+    }),
+    // Above a solved puzzle; `done` closes the tutorial.
+    solved: {
+      first: { text: "Good job, you solved your first puzzle!" },
+      self: { text: "Well done, that's two!" },
+      three: { text: "Three down!" },
+      done: {
+        lead: "That's the whole game: choose answers that make every question true.",
+        text: "Daily puzzles are bigger, and the Hint button is there when you're stuck.",
+      },
+    } satisfies Record<TutorialSolvedKey, StepCopy>,
+    next: "Next",
+    play: "Play today's puzzle",
   },
   notFound: {
     noPuzzle: "No puzzle",

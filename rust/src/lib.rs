@@ -142,7 +142,7 @@ mod wasm_api {
     struct StepApi {
         action: DeduceActionApi,
         explain: Vec<ExplainStep>,
-        /// 0-based questions to look at, for the L1 coach's arrows.
+        /// 0-based questions the step reads.
         focus_qis: Vec<usize>,
     }
 
