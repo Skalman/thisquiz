@@ -605,9 +605,8 @@ mod tests {
         );
     }
 
-    /// Shared fixtures: each case is a puzzle plus whether it should raise a *fatal*
-    /// error. Warnings are deliberately not asserted on — they're advisory, and
-    /// `expectError: false` cases carry some.
+    /// Shared fixtures: each case is a puzzle plus its worst result — `ok`,
+    /// `warning` or `error`.
     #[test]
     fn test_shared_check_form() {
         let json_str = std::fs::read_to_string("../tests/check-form.json")
@@ -621,20 +620,26 @@ mod tests {
                 continue;
             }
             let name = test["name"].as_str().unwrap();
-            let expect_error = test["expectError"].as_bool().unwrap();
+            let expect = test["expect"].as_str().unwrap();
             let Some(fp) = crate::serialize::parse_puzzle(&test["puzzle"]) else {
                 eprintln!("FAIL: {name}: parse failed");
                 failed += 1;
                 continue;
             };
             let errors = check_form(&fp);
-            let got = errors.iter().any(|e| e.severity == Severity::Error);
-            if got == expect_error {
+            let got = if errors.iter().any(|e| e.severity == Severity::Error) {
+                "error"
+            } else if errors.is_empty() {
+                "ok"
+            } else {
+                "warning"
+            };
+            if got == expect {
                 passed += 1;
                 continue;
             }
             failed += 1;
-            eprintln!("FAIL: {name}: expected fatal={expect_error}, got {got}");
+            eprintln!("FAIL: {name}: expected {expect}, got {got}");
             for e in &errors {
                 eprintln!("    Q{} {:?}: {}", e.qi + 1, e.severity, e.message);
             }
