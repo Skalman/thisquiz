@@ -327,6 +327,58 @@
       "expect": "error"
     },
     {
+      "name": "TrueStmt: AnswerOf claim self-referencing",
+      "puzzle": {
+        "o": [
+          [1, 0, 2, 1, 1],
+          [0, 1, 2, 3, 4],
+          [0, 1, 2, 3, 4],
+          [0, 1, 2, 3, 4],
+          [0, 1, 2, 3, 4]
+        ],
+        "q": [
+          {
+            "t": "TrueStmt"
+          },
+          {
+            "t": "AnswerIsSelf"
+          },
+          {
+            "t": "AnswerIsSelf"
+          },
+          {
+            "t": "AnswerIsSelf"
+          },
+          {
+            "t": "AnswerIsSelf"
+          }
+        ],
+        "t": [
+          {
+            "a": 0,
+            "t": "CountAnswer"
+          },
+          {
+            "q": 0,
+            "t": "AnswerOf"
+          },
+          {
+            "a": 1,
+            "t": "CountAnswer"
+          },
+          {
+            "a": 2,
+            "t": "CountAnswer"
+          },
+          {
+            "a": 3,
+            "t": "CountAnswer"
+          }
+        ]
+      },
+      "expect": "warning"
+    },
+    {
       "section": "=== AnswerOf ==="
     },
     {
@@ -350,7 +402,7 @@
           }
         ]
       },
-      "expect": "error"
+      "expect": "warning"
     },
     {
       "name": "AnswerOf: out of range",

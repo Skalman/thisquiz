@@ -99,6 +99,9 @@ fn check_question_form(
             ));
         }
         if ref_qi == qi {
+            if matches!(qt, QuestionType::AnswerOf { .. }) {
+                return warning(format!("{:?} references itself", qt.kind()));
+            }
             return error(format!("{:?} references itself", qt.kind()));
         }
     }
@@ -531,6 +534,35 @@ mod tests {
         let result = crate::solve_deduce::solve(&fp);
         assert!(result.solved);
         assert_eq!(result.answers[0], Some(Answer::A));
+    }
+
+    #[test]
+    fn answer_of_itself_is_a_warning_and_solves() {
+        // Options claim B, A, C: only C claims its own letter.
+        let fp = flat(
+            &[QuestionType::AnswerOf { question_index: 0 }],
+            &[[
+                OptionValue::num(1),
+                OptionValue::num(0),
+                OptionValue::num(2),
+                OptionValue::UNUSED,
+                OptionValue::UNUSED,
+            ]],
+            None,
+            3,
+        );
+        let errs = check_form(&fp);
+        assert!(
+            errs.iter().all(|e| e.severity != Severity::Error)
+                && errs.iter().any(|e| e.message.contains("references itself")),
+            "a self-reference should warn, not fail: {errs:?}"
+        );
+        let solutions = crate::solve_brute::solve(&fp, 2);
+        assert_eq!(solutions.len(), 1);
+        assert_eq!(solutions[0][0], Answer::C);
+        let result = crate::solve_deduce::solve(&fp);
+        assert!(result.solved);
+        assert_eq!(result.answers[0], Some(Answer::C));
     }
 
     #[test]
