@@ -491,6 +491,66 @@
         ]
       },
       "expect": "error"
+    },
+    {
+      "name": "ClosestBefore: position past the last question",
+      "puzzle": {
+        "o": [
+          [null, 0],
+          [0, 1]
+        ],
+        "q": [
+          {
+            "t": "ClosestBefore",
+            "a": 0,
+            "q": 2
+          },
+          {
+            "t": "AnswerIsSelf"
+          }
+        ]
+      },
+      "expect": "error"
+    },
+    {
+      "name": "ClosestBefore: position at the last question",
+      "puzzle": {
+        "o": [
+          [0, 1],
+          [null, 0]
+        ],
+        "q": [
+          {
+            "t": "AnswerIsSelf"
+          },
+          {
+            "t": "ClosestBefore",
+            "a": 0,
+            "q": 1
+          }
+        ]
+      },
+      "expect": "ok"
+    },
+    {
+      "name": "CountAnswerBefore: position past the last question",
+      "puzzle": {
+        "o": [
+          [0, 1],
+          [0, 1]
+        ],
+        "q": [
+          {
+            "t": "CountAnswerBefore",
+            "a": 0,
+            "q": 2
+          },
+          {
+            "t": "AnswerIsSelf"
+          }
+        ]
+      },
+      "expect": "error"
     }
   ]
 }

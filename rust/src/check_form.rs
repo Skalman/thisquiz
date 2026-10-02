@@ -106,12 +106,12 @@ fn check_question_form(
         }
     }
 
-    // Positional index in range: `before_index` is an exclusive bound (so `n` is
-    // fine); `after_index` is a position that needs a question after it.
+    // Positional index in range: both name a question on the board, and
+    // `after_index` also needs a question after it.
     match qt {
         QuestionType::CountAnswerBefore { before_index, .. }
         | QuestionType::ClosestBefore { before_index, .. }
-            if usize::from(*before_index) > n =>
+            if usize::from(*before_index) >= n =>
         {
             return error(format!(
                 "{:?} references out-of-range position {before_index}",
