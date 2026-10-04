@@ -118,23 +118,16 @@ test.describe("as a crawler", () => {
   });
 });
 
-test("skipping offers the two ways onward, with the tutorial retired", async ({ page }) => {
+test("skipping a first visit's tutorial opens the overview, with the tutorial retired", async ({
+  page,
+}) => {
   await freshDevice(page);
-  await page.goto("/tutorial");
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/tutorial$/);
   await page.getByTestId("tutorial-skip").click();
-  await expect(page.getByTestId("tutorial-skip")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByTestId("overview-daily")).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem("thisquiz:tutorial"))).toBe("1");
-  await page.getByTestId("tutorial-daily").click();
-  await expect(page).toHaveURL(/\/daily$/);
-  await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
-});
-
-test("skipping then choosing the Adventure opens its map", async ({ page }) => {
-  await freshDevice(page);
-  await page.goto("/tutorial");
-  await page.getByTestId("tutorial-skip").click();
-  await page.getByTestId("tutorial-adventure").click();
-  await expect(page).toHaveURL(/\/adventure$/);
 });
 
 test("the first level links to the tutorial", async ({ page }) => {

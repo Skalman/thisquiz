@@ -317,14 +317,9 @@ export default {
       },
     } satisfies Record<TutorialSolvedKey, StepCopy>,
     next: "Next",
-    // The two ways onward, from the last puzzle or from Skip.
+    // The two ways onward, from the last puzzle.
     playAdventure: "Play the Adventure",
     playDaily: "Play today's puzzles",
-    // Skip's page, above the two ways onward.
-    choose: {
-      lead: "How do you want to play?",
-      text: "In the Adventure, you encounter quick puzzles. For more thinking, check out the bigger daily puzzles.",
-    },
   },
   // The Adventure: a path of steps, each offering one small puzzle per size.
   adventure: {

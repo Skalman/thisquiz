@@ -36,7 +36,7 @@ import { isCrawler } from "./lib/crawler.ts";
 import { track, getClientInfo } from "./lib/analytics.ts";
 import { Button } from "./components/ui/Button.tsx";
 import { TutorialOpening } from "./components/TutorialOpening.tsx";
-import { TutorialDestinations, type TutorialDestination } from "./components/TutorialPanel.tsx";
+import type { TutorialDestination } from "./components/TutorialPanel.tsx";
 import { guarded } from "./lib/keyboard.ts";
 import { t } from "./i18n/index.ts";
 import { replayLogoAnimation } from "./components/Logo.tsx";
@@ -91,8 +91,8 @@ function DailyTodayRoute() {
 
 /**
  * The guided tutorial, without the app's chrome: a lone cell, then its fixed
- * puzzles in turn. Finishing, or skipping on a first visit, offers the
- * Adventure or today; skipping a tutorial a link opened goes back there.
+ * puzzles in turn. Finishing offers the Adventure or today; skipping goes
+ * back to the page whose link opened it, or else to the overview.
  */
 function TutorialRoute() {
   const s = t();
@@ -103,8 +103,6 @@ function TutorialRoute() {
   const last = stage === TUTORIAL_PUZZLES.length;
   // The last puzzle solved: nothing left to skip.
   const [finished, setFinished] = useState(false);
-  // Skipped, with the ways onward in its place.
-  const [skipped, setSkipped] = useState(false);
   const puzzle = useMemo(
     () => (script ? { ...parseCompactPuzzle(script.compact), id: TUTORIAL_ID } : null),
     [script],
@@ -126,9 +124,7 @@ function TutorialRoute() {
   function skip() {
     markTutorialDone();
     track("tutorial_skipped", getClientInfo());
-    const opener = tutorialOpener();
-    if (opener === null) setSkipped(true);
-    else leaveFor(opener);
+    leaveFor(tutorialOpener());
   }
   function solved() {
     if (!last) return;
@@ -140,7 +136,7 @@ function TutorialRoute() {
     // Centered in the viewport, less the page padding.
     <div class="flex min-h-screen-safe-4 flex-col justify-center">
       {/* Pinned to the viewport's corner, over the arrow; first in tab order. */}
-      {!finished && !skipped && (
+      {!finished && (
         <Button
           variant="ghost"
           class="fixed top-safe-4 right-safe-4 z-10 bg-page"
@@ -150,9 +146,7 @@ function TutorialRoute() {
           {s.tutorial.skip}
         </Button>
       )}
-      {skipped ? (
-        <TutorialDestinations copy={s.tutorial.choose} destinations={destinations} />
-      ) : script && puzzle ? (
+      {script && puzzle ? (
         <PuzzleView
           key={stage}
           puzzle={puzzle}
