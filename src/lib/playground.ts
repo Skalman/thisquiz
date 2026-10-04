@@ -32,11 +32,8 @@ export function savedStateFromMarks(marks: Marks[]): SavedState {
 // Hash format: p=<url-safe-base64(deflate(json))>[&h=<encoded-play-state>]
 
 async function deflate(str: string): Promise<Uint8Array> {
-  const cs = new CompressionStream("deflate-raw");
-  const writer = cs.writable.getWriter();
-  await writer.write(new TextEncoder().encode(str));
-  await writer.close();
-  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+  const compressed = new Blob([str]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(compressed).arrayBuffer());
 }
 
 async function inflate(bytes: Uint8Array): Promise<string> {
