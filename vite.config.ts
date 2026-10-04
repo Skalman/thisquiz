@@ -102,7 +102,7 @@ function swPrecachePlugin(): Plugin {
       const hash = createHash("sha256").update(precache.join(",")).digest("hex").slice(0, 8);
 
       const sw = readFileSync(swPath, "utf8")
-        .replace(/const SHELL_CACHE = "[^"]*";/, `const SHELL_CACHE = "refpuzzle-${hash}";`)
+        .replace(/const SHELL_CACHE = "[^"]*";/, `const SHELL_CACHE = "thisquiz-${hash}";`)
         .replace(/const PRECACHE = \[[^\]]*\];/, `const PRECACHE = ${JSON.stringify(precache)};`);
       // Inject before minifying — the regex needs the readable source.
       const { code } = minifySync(swPath, sw);

@@ -1,10 +1,10 @@
 // Rewritten at build time by swPrecachePlugin (vite.config.ts) to the hashed
 // asset list. These dev fallbacks never run — the SW is prod-only (main.tsx).
-const SHELL_CACHE = "refpuzzle-dev";
+const SHELL_CACHE = "thisquiz-dev";
 
 // Own cache, so code deploys don't wipe it. Bump -vN only if the compact puzzle
 // format changes incompatibly (forces a fresh fetch).
-const DATA_CACHE = "refpuzzle-data-v1";
+const DATA_CACHE = "thisquiz-data-v1";
 
 const PRECACHE = ["/", "/logo.svg", "/manifest.json"];
 

@@ -83,7 +83,7 @@ A puzzle is a grid: `n` **questions** down, `option_count` **options** across.
   3×3 from 100. Solving any one completes the step. A size is written options ×
   questions, as the grid is wide and tall, and that's also its **size key** (`3x2` is
   2 questions of 3 options). The puzzles come from one list per size
-  (`public/puzzles/adventure.json`, from `refpuzzle gen adventure`). Hint is the only
+  (`public/puzzles/adventure.json`, from `thisquiz gen adventure`). Hint is the only
   tool; a solve without hints earns that puzzle's **star**, kept through a replay.
 - **step** — on its own, one of the Adventure's. Elsewhere it's always qualified: a
   **history step** (one entry in a board's history), a **tutorial step** (one part of

@@ -1,10 +1,10 @@
-use refpuzzle::construct;
-use refpuzzle::recipes;
-use refpuzzle::rng::Rng;
-use refpuzzle::solve_deduce::{NoSteps, run_engine};
-use refpuzzle::stats::Stats;
-use refpuzzle::types::{Answer, FlatPuzzle, MAX_N, OptionValue, QuestionType, QuestionTypeKind};
 use std::collections::{BTreeMap, BTreeSet};
+use thisquiz::construct;
+use thisquiz::recipes;
+use thisquiz::rng::Rng;
+use thisquiz::solve_deduce::{NoSteps, run_engine};
+use thisquiz::stats::Stats;
+use thisquiz::types::{Answer, FlatPuzzle, MAX_N, OptionValue, QuestionType, QuestionTypeKind};
 
 const LETTER_LABELS: [&str; 5] = ["A", "B", "C", "D", "E"];
 
@@ -745,8 +745,8 @@ fn sorted_present_kinds(per_type: &BTreeMap<QuestionTypeKind, TypeStats>) -> Vec
 #[cfg(test)]
 mod tests {
     use super::*;
-    use refpuzzle::test_util::fast_tests;
-    use refpuzzle::types::QuestionTypeKind as Kind;
+    use thisquiz::test_util::fast_tests;
+    use thisquiz::types::QuestionTypeKind as Kind;
 
     /// Acceptable band for a value's correct-share ÷ distractor-share. The ratio converts
     /// straight to the player-facing rate:

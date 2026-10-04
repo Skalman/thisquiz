@@ -1,7 +1,7 @@
 import init, {
   Puzzle as WasmPuzzle,
   generatePuzzle as wasmGeneratePuzzle,
-} from "../../rust/pkg/refpuzzle.js";
+} from "../../rust/pkg/thisquiz.js";
 import type { Puzzle, RenderedQuestion, Marks, Answer } from "../engine/types.ts";
 import { L2I } from "../engine/types.ts";
 import type { SolveStep } from "../engine/hint-types.ts";

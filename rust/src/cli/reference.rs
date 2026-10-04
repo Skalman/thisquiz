@@ -1,4 +1,4 @@
-//! `refpuzzle reference`: a living reference of every question type and deduce
+//! `thisquiz reference`: a living reference of every question type and deduce
 //! rule, each with a real rendered example collected by solving the daily corpus
 //! under the full engine. Examples stay accurate as prose/rules change, and any
 //! kind or rule never seen in the corpus is called out (a coverage signal).
@@ -6,18 +6,18 @@
 
 use std::collections::BTreeMap;
 
-use refpuzzle::deduce::{
+use thisquiz::deduce::{
     ALL_DEDUCE_RULES, DeduceAction, DeduceReasons, DeduceResult, apply_action,
     deduce_assuming_unique, deduce_assuming_unique_with_reasons,
 };
-use refpuzzle::explain::{
+use thisquiz::explain::{
     ExplainStep, explain_deduce, explain_lookahead, no_reason_detail, optionless_detail,
 };
-use refpuzzle::format;
-use refpuzzle::lookahead::{Contradiction, lookahead, lookahead_shortest};
-use refpuzzle::render;
-use refpuzzle::solve_deduce::{EngineConfig, VERIFY_ITERS_PER_QUESTION};
-use refpuzzle::types::{Claim, FlatPuzzle, QuestionType, QuestionTypeKind};
+use thisquiz::format;
+use thisquiz::lookahead::{Contradiction, lookahead, lookahead_shortest};
+use thisquiz::render;
+use thisquiz::solve_deduce::{EngineConfig, VERIFY_ITERS_PER_QUESTION};
+use thisquiz::types::{Claim, FlatPuzzle, QuestionType, QuestionTypeKind};
 
 /// The user-facing prose of an explanation: its `Simple` steps joined (`Look` steps
 /// are navigation, carrying no text).

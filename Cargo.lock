@@ -208,22 +208,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "refpuzzle"
-version = "0.1.0"
-dependencies = [
- "arrayvec",
- "base64",
- "flate2",
- "lol_alloc",
- "rayon",
- "refpuzzle",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "rustversion"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -319,6 +303,22 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "thisquiz"
+version = "0.1.0"
+dependencies = [
+ "arrayvec",
+ "base64",
+ "flate2",
+ "lol_alloc",
+ "rayon",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thisquiz",
+ "wasm-bindgen",
 ]
 
 [[package]]

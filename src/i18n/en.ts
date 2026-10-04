@@ -27,7 +27,7 @@ function qList(qis: number[]): string {
 
 export default {
   app: {
-    title: "Refpuzzle",
+    title: "This Quiz",
     loading: "Loading...",
     noPuzzle: "No puzzle available for this date.",
   },
@@ -163,7 +163,7 @@ export default {
     close: "Close",
     dismiss: "Dismiss",
     more: "More",
-    logo: "Refpuzzle logo",
+    logo: "This Quiz logo",
   },
   // The front page: a window onto each section, then the app's own things.
   overview: {
@@ -200,7 +200,7 @@ export default {
     // The pasteable result: headline, one square per question, then the link.
     // `time` is null for a solve that was never timed on this device.
     resultHeadline: (day: number, level: string, time: string | null) =>
-      [`Refpuzzle Day #${day}`, level, ...(time ? [time] : [])].join(" · "),
+      [`This Quiz Day #${day}`, level, ...(time ? [time] : [])].join(" · "),
     outcomeEmoji: { clean: "🟩", hinted: "🟨", caught: "🟥" },
     // Its own line under perfect squares, on the card and in the pasted text.
     perfectCaption: "↑ all green ✨",

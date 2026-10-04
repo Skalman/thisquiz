@@ -7,20 +7,20 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#faf9f7" />
-    <title>Refpuzzle</title>
+    <title>This Quiz</title>
     <meta
       name="description"
       content="Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Refpuzzle" />
-    <meta property="og:title" content="Refpuzzle" />
+    <meta property="og:site_name" content="This Quiz" />
+    <meta property="og:title" content="This Quiz" />
     <meta
       property="og:description"
       content="Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself."
     />
-    <meta property="og:url" content="https://refpuzzle.com/" />
-    <meta property="og:image" content="https://refpuzzle.com/screenshot-desktop.png" />
+    <meta property="og:url" content="https://thisquiz.app/" />
+    <meta property="og:image" content="https://thisquiz.app/screenshot-desktop.png" />
     <meta property="og:image:width" content="1920" />
     <meta property="og:image:height" content="1080" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -29,6 +29,11 @@
       if (t) document.documentElement.setAttribute("data-theme", t);
       var dark = t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);
       document.querySelector('meta[name="theme-color"]').content = dark ? "#0f1117" : "#faf9f7";
+      // Every page names its thisquiz.app address.
+      var canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      canonical.href = "https://thisquiz.app" + location.pathname;
+      document.head.appendChild(canonical);
     </script>
     <!-- Fallback shown when the app never mounts (see main.tsx). Self-contained,
          so it works without the bundle. -->
@@ -110,7 +115,7 @@
 
     <div id="fatal" hidden role="alert">
       <div class="fatal-card">
-        <h2 id="fatal-title">Couldn't load Refpuzzle</h2>
+        <h2 id="fatal-title">Couldn't load This Quiz</h2>
         <p id="fatal-body">
           The puzzle engine failed to start. This usually clears up after a cache reset — most often
           needed once after the app updates.
@@ -184,7 +189,7 @@
             xhr.send(JSON.stringify({ event: "boot_timeout", props: { ua: navigator.userAgent } }));
           } catch (e) {}
           window.showFatalError(null, {
-            title: "Refpuzzle didn't load",
+            title: "This Quiz didn't load",
             body: "It's taking longer than expected. Your browser may be out of date, or your connection dropped. Try reloading — a cache reset can also help.",
           });
         }, 10000);

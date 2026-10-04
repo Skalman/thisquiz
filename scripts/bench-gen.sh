@@ -4,7 +4,7 @@
 set -uo pipefail
 
 n="${1:-10}"
-bin="target/release/refpuzzle"
+bin="target/release/thisquiz"
 times=()
 
 print_stats() {

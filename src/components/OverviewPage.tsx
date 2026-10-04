@@ -304,7 +304,7 @@ export function OverviewPage() {
       {dialog === "about" && <AboutDialog onClose={close} />}
       {dialog === "debug" && <DebugDialog onClose={close} />}
 
-      <BackupDialogs backup={backup} exportFilename="refpuzzle-backup.json" />
+      <BackupDialogs backup={backup} exportFilename="thisquiz-backup.json" />
     </div>
   );
 }

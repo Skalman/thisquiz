@@ -30,7 +30,7 @@ fn counts(sol: &[Answer], n: usize) -> [u8; 5] {
 /// Well-posedness that the answer key alone (plus the question's params) settles.
 /// `None` if `qi` has a unique answer; `Some(reason)` if the key leaves it
 /// ambiguous. Called at parametrize (authoritative — nothing downstream changes it)
-/// and in `refpuzzle check` (untrusted input).
+/// and in `thisquiz check` (untrusted input).
 pub fn check_well_posed_given_key(
     n: usize,
     oc: usize,
@@ -119,7 +119,7 @@ pub fn check_well_posed_given_key(
 /// `None` if `qi`
 /// has a unique answer; `Some(reason)` if a distractor *also* holds (OnlySameAmong /
 /// OnlySameAsAmong) or the true-claim count isn't exactly one (TrueStmt). Called at the
-/// accept-gate, the repair keep-gate, and `refpuzzle check`.
+/// accept-gate, the repair keep-gate, and `thisquiz check`.
 pub fn check_well_posed_given_key_and_options(
     fp: &FlatPuzzle,
     sol: &[Answer],

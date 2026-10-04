@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Refpuzzle",
-  "short_name": "Refpuzzle",
+  "name": "This Quiz",
+  "short_name": "This Quiz",
   "description": "Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself.",
   "start_url": "/",
   "display": "standalone",

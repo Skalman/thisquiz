@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/analytics-helper.php';
 
-$dir = $GLOBALS['_app_config']['dir'] ?? '/tmp/refpuzzle-sync';
+$dir = $GLOBALS['_app_config']['dir'] ?? '/tmp/thisquiz-sync';
 $max_age = 300; // 5 minutes
 $max_files = 50;
 $max_body = 102400; // 100 KB

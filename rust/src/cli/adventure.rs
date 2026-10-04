@@ -8,16 +8,16 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use refpuzzle::check_form::check_form;
-use refpuzzle::construct::{DEFAULT_MAX_REGENERATIONS, generate};
-use refpuzzle::recipes::RECIPES;
-use refpuzzle::render::{OptionLabelKind, option_label_kind};
-use refpuzzle::rng::Rng;
-use refpuzzle::serialize::puzzle_to_compact_value;
-use refpuzzle::solve_brute;
-use refpuzzle::solve_deduce::{EngineConfig, NoSteps, VERIFY_ITERS_PER_QUESTION, run_engine};
-use refpuzzle::stats::Stats;
-use refpuzzle::types::*;
+use thisquiz::check_form::check_form;
+use thisquiz::construct::{DEFAULT_MAX_REGENERATIONS, generate};
+use thisquiz::recipes::RECIPES;
+use thisquiz::render::{OptionLabelKind, option_label_kind};
+use thisquiz::rng::Rng;
+use thisquiz::serialize::puzzle_to_compact_value;
+use thisquiz::solve_brute;
+use thisquiz::solve_deduce::{EngineConfig, NoSteps, VERIFY_ITERS_PER_QUESTION, run_engine};
+use thisquiz::stats::Stats;
+use thisquiz::types::*;
 
 /// A puzzle size, and the step where the path first offers it.
 struct Size {
@@ -570,8 +570,8 @@ fn format_lists(lists: &[(String, Vec<FlatPuzzle>)]) -> String {
 #[cfg(test)]
 mod tests {
     use super::{SIZES, candidates, letter_permutations, puzzle, transform};
-    use refpuzzle::solve_brute;
-    use refpuzzle::types::Answer;
+    use thisquiz::solve_brute;
+    use thisquiz::types::Answer;
 
     /// A twin has exactly one solution: the original's, relabeled and mirrored.
     #[test]

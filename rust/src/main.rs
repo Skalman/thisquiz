@@ -5,13 +5,13 @@ mod corpus;
 #[cfg(test)]
 mod test_symmetry;
 
-use refpuzzle::rng::Rng;
-use refpuzzle::types::FlatPuzzle;
-use refpuzzle::{construct, recipes, rng, serialize, stats};
 use serde_json::Value;
 use std::time::Instant;
+use thisquiz::rng::Rng;
+use thisquiz::types::FlatPuzzle;
+use thisquiz::{construct, recipes, rng, serialize, stats};
 
-// RefPuzzle's public launch date. No puzzles exist before it, so a 2026 range
+// This Quiz's public launch date. No puzzles exist before it, so a 2026 range
 // with no explicit start defaults here, and an explicit pre-launch start in 2026
 // is clamped up to it; any other pre-launch start is rejected outright.
 const LAUNCH_YEAR: u32 = 2026;
@@ -148,18 +148,18 @@ fn parse_date_range(input: &str) -> DateRange {
 }
 
 fn print_help() {
-    eprintln!("Usage: refpuzzle gen <date-range> -o FILE [options]");
-    eprintln!("       refpuzzle gen adventure -o FILE [--overwrite]   (Adventure corpus)");
-    eprintln!("       refpuzzle check <file.json> [MMDD-level] [--json]");
-    eprintln!("       refpuzzle check -   (reads a year map or single puzzle from stdin)");
-    eprintln!("       refpuzzle format-check  (reads JSON from stdin)");
-    eprintln!("       refpuzzle reference [--details]   (question type + deduce rule examples)");
-    eprintln!("       refpuzzle type-stats -o FILE [--attempts N] [--seed S]");
+    eprintln!("Usage: thisquiz gen <date-range> -o FILE [options]");
+    eprintln!("       thisquiz gen adventure -o FILE [--overwrite]   (Adventure corpus)");
+    eprintln!("       thisquiz check <file.json> [MMDD-level] [--json]");
+    eprintln!("       thisquiz check -   (reads a year map or single puzzle from stdin)");
+    eprintln!("       thisquiz format-check  (reads JSON from stdin)");
+    eprintln!("       thisquiz reference [--details]   (question type + deduce rule examples)");
+    eprintln!("       thisquiz type-stats -o FILE [--attempts N] [--seed S]");
     eprintln!(
-        "       refpuzzle type-stats --calibration   (fill::none_correct_rate table, paste-ready)"
+        "       thisquiz type-stats --calibration   (fill::none_correct_rate table, paste-ready)"
     );
     eprintln!(
-        "       refpuzzle gen-stats [-a N] [-n N] [-l 1-6] [--seed S] [--origin URL]   (gen quality: histogram + links)"
+        "       thisquiz gen-stats [-a N] [-n N] [-l 1-6] [--seed S] [--origin URL]   (gen quality: histogram + links)"
     );
     eprintln!();
     eprintln!("Options:");
@@ -174,13 +174,13 @@ fn print_help() {
     eprintln!("  --details     reference: add the lookahead hint audit (slow)");
     eprintln!();
     eprintln!("Examples:");
-    eprintln!("  refpuzzle gen 2051 -o out.json");
-    eprintln!("  refpuzzle gen 2051-03 -o out.json -l 4");
-    eprintln!("  refpuzzle gen 2051-01..2051-06 -o out.json -m");
-    eprintln!("  refpuzzle check puzzles/daily/2051.json");
-    eprintln!("  refpuzzle check puzzles/daily/2051.json 0315-4");
-    eprintln!("  refpuzzle check puzzles/daily/2051.json --json | refpuzzle format-check");
-    eprintln!("  echo '{{\"o\":[...],\"q\":[...]}}' | refpuzzle check -");
+    eprintln!("  thisquiz gen 2051 -o out.json");
+    eprintln!("  thisquiz gen 2051-03 -o out.json -l 4");
+    eprintln!("  thisquiz gen 2051-01..2051-06 -o out.json -m");
+    eprintln!("  thisquiz check puzzles/daily/2051.json");
+    eprintln!("  thisquiz check puzzles/daily/2051.json 0315-4");
+    eprintln!("  thisquiz check puzzles/daily/2051.json --json | thisquiz format-check");
+    eprintln!("  echo '{{\"o\":[...],\"q\":[...]}}' | thisquiz check -");
 }
 
 /// Consume the value after a value-taking flag `name` (currently at `args[*i]`),
@@ -276,7 +276,7 @@ fn main() {
                 }
             }
             let Some(file) = file else {
-                eprintln!("Usage: refpuzzle check <file.json> [MMDD-level] [--json]");
+                eprintln!("Usage: thisquiz check <file.json> [MMDD-level] [--json]");
                 std::process::exit(1);
             };
             cli::check::check_command(&file, target.as_deref(), json_output);
@@ -320,8 +320,8 @@ fn main() {
                 return;
             }
             let Some(output) = output else {
-                eprintln!("Usage: refpuzzle type-stats -o FILE [--attempts N] [--seed N]");
-                eprintln!("       refpuzzle type-stats --calibration [--attempts N] [--seed N]");
+                eprintln!("Usage: thisquiz type-stats -o FILE [--attempts N] [--seed N]");
+                eprintln!("       thisquiz type-stats --calibration [--attempts N] [--seed N]");
                 eprintln!("  -o FILE        output file (required, - for stdout)");
                 eprintln!(
                     "  --calibration  print fill::none_correct_rate's table body, paste-ready"
@@ -429,7 +429,7 @@ fn main() {
     }
 
     let date_range_str = date_range_str.unwrap_or_else(|| {
-        eprintln!("Error: date range is required. Example: refpuzzle gen 2051 -o out.json");
+        eprintln!("Error: date range is required. Example: thisquiz gen 2051 -o out.json");
         std::process::exit(1);
     });
     let DateRange {

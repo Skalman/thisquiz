@@ -1,4 +1,4 @@
-//! CLI harness for `refpuzzle check`: runs a puzzle (or a whole year file)
+//! CLI harness for `thisquiz check`: runs a puzzle (or a whole year file)
 //! through solve / deduce / form / well-posed and prints a verdict. Not on the
 //! play or generate path.
 
@@ -8,15 +8,15 @@ use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::cli::link;
-use refpuzzle::check_form;
-use refpuzzle::check_well_posed;
-use refpuzzle::deduce;
-use refpuzzle::format;
-use refpuzzle::recipes;
-use refpuzzle::serialize;
-use refpuzzle::solve_brute;
-use refpuzzle::solve_deduce;
-use refpuzzle::types::*;
+use thisquiz::check_form;
+use thisquiz::check_well_posed;
+use thisquiz::deduce;
+use thisquiz::format;
+use thisquiz::recipes;
+use thisquiz::serialize;
+use thisquiz::solve_brute;
+use thisquiz::solve_deduce;
+use thisquiz::types::*;
 
 // ── Color ──
 

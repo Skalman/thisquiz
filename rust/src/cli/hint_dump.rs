@@ -1,15 +1,15 @@
-//! `refpuzzle hint-dump`: every hint the corpus can produce, one line each, for
+//! `thisquiz hint-dump`: every hint the corpus can produce, one line each, for
 //! diffing what players read across engine changes. Walks each puzzle's verify
 //! solve and renders every deduction of every round (against that round's
 //! pre-state) plus every lookahead refutation — the same paths `reference`
 //! samples, dumped in full instead of one example per rule.
 
-use refpuzzle::deduce::{
+use thisquiz::deduce::{
     DeduceReason, DeduceReasons, DeduceResult, apply_action, deduce_assuming_unique_with_reasons,
 };
-use refpuzzle::explain::{ExplainStep, explain_deduce, explain_lookahead, focus_questions};
-use refpuzzle::lookahead::lookahead_shortest;
-use refpuzzle::solve_deduce::VERIFY_ITERS_PER_QUESTION;
+use thisquiz::explain::{ExplainStep, explain_deduce, explain_lookahead, focus_questions};
+use thisquiz::lookahead::lookahead_shortest;
+use thisquiz::solve_deduce::VERIFY_ITERS_PER_QUESTION;
 
 /// One hint as a line: first the questions its last `Look` step points at, then
 /// the prose from its text steps. The

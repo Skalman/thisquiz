@@ -1,8 +1,8 @@
-# Refpuzzle
+# This Quiz
 
 Self-referential logic puzzles, in the spirit of Jim Propp's *Self-Referential Aptitude Test*.
 
-Live at **[refpuzzle.com](https://refpuzzle.com)**.
+Live at **[thisquiz.app](https://thisquiz.app)**.
 
 ## How it works
 

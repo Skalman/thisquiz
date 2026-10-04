@@ -1,14 +1,14 @@
 //! Shared helpers for the test suites — the lib's own (via `cfg(test)`) and the
 //! bin's (via the `test-util` feature, which only the self-dev-dependency turns on).
 
-/// Gate for slow tests. `REFPUZZLE_FAST_TESTS` set → reduced fast run (true); an
+/// Gate for slow tests. `THISQUIZ_FAST_TESTS` set → reduced fast run (true); an
 /// optimized build without it → full run (false); an unoptimized build without
 /// it → panic, since the full run would take minutes.
 pub fn fast_tests() -> bool {
-    let fast = std::env::var("REFPUZZLE_FAST_TESTS").is_ok();
+    let fast = std::env::var("THISQUIZ_FAST_TESTS").is_ok();
     assert!(
         fast || !cfg!(debug_assertions),
-        "slow test — run with --release or set REFPUZZLE_FAST_TESTS=1"
+        "slow test — run with --release or set THISQUIZ_FAST_TESTS=1"
     );
     fast
 }
