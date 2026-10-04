@@ -1,7 +1,9 @@
+import { useEffect, useState } from "preact/hooks";
+
 /**
  * Development switches, kept in sessionStorage so they survive a reload but
  * never a new tab. `?debug` is the one URL entry point, and sets the flag for
- * the session; everything else is set from the footer's Debug dialog.
+ * the session; everything else is set from the overview's Debug dialog.
  */
 
 const DEBUG_KEY = "debug";
@@ -45,4 +47,36 @@ export function nudgeSeconds(): number | null {
 
 export function setNudgeSeconds(seconds: number | null): void {
   write(NUDGE_KEY, seconds === null ? null : String(seconds));
+}
+
+const REACHED_STEP_KEY = "debug:adventure-reached";
+
+/** The Adventure's reached step, set by hand; null leaves the path as played. */
+export function reachedStepOverride(): number | null {
+  const step = Number(read(REACHED_STEP_KEY));
+  return Number.isInteger(step) && step >= 1 ? step : null;
+}
+
+export function setReachedStepOverride(step: number | null): void {
+  write(REACHED_STEP_KEY, step === null ? null : String(step));
+}
+
+const changeListeners = new Set<() => void>();
+
+/** Puts saved switches to work: the app remounts, so every reader reads them afresh. */
+export function applyDebugChanges(): void {
+  for (const listener of changeListeners) listener();
+}
+
+/** A count that rises with each applied change, as a key that remounts the app. */
+export function useDebugRevision(): number {
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const listener = () => setRevision((was) => was + 1);
+    changeListeners.add(listener);
+    return () => {
+      changeListeners.delete(listener);
+    };
+  }, []);
+  return revision;
 }

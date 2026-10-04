@@ -540,6 +540,13 @@ export function saveState(puzzleId: string, state: SavedState) {
   }
 }
 
+/** Forgets a puzzle's board and its record, as if it was never played. */
+export function clearState(puzzleId: string): void {
+  try {
+    localStorage.removeItem(PREFIX + puzzleId);
+  } catch {}
+}
+
 export function getCompletedPuzzleIds(): string[] {
   const ids: string[] = [];
   try {

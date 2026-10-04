@@ -1,26 +1,29 @@
 import { createContext } from "preact";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useRef } from "preact/hooks";
+import { useLocation } from "preact-iso";
 import type { Design } from "../lib/design.ts";
-import { DESIGN_CHANGE, storedDesign } from "../lib/design.ts";
+import { designForPath } from "../lib/design.ts";
+import { switchWithTransition } from "../lib/switchTransition.ts";
 
 /** The app's design, provided at the root. */
-export const DesignContext = createContext<Design>("zen");
+export const DesignContext = createContext<Design>("play");
 
 export function useDesign(): Design {
   return useContext(DesignContext);
 }
 
-/** The stored design, kept in sync across tabs. */
-export function useStoredDesign(): Design {
-  const [design, setDesign] = useState(storedDesign);
-  useEffect(() => {
-    const sync = () => setDesign(storedDesign());
-    window.addEventListener(DESIGN_CHANGE, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(DESIGN_CHANGE, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
+/**
+ * The current section's design. A move into a section with the other look eases
+ * across: the switch is armed during the render, so the new classes land
+ * already transitioning.
+ */
+export function useSectionDesign(): Design {
+  const { path } = useLocation();
+  const design = designForPath(path);
+  const shown = useRef(design);
+  if (shown.current !== design) {
+    shown.current = design;
+    switchWithTransition(() => {});
+  }
   return design;
 }

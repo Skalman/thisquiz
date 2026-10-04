@@ -139,6 +139,25 @@ async function generateDay(dateStr: string): Promise<Record<string, Puzzle> | nu
   return day;
 }
 
+/** A daily puzzle's storage key, which differs from its page's path. */
 export function puzzleId(dateStr: string, level: number): string {
   return `/${dateStr}/${level}`;
+}
+
+/** Today's daily puzzles. */
+export const DAILY_PATH = "/daily";
+
+export const ARCHIVE_PATH = "/daily/archive";
+
+/** A daily puzzle's page. */
+export function dailyPuzzlePath(dateStr: string, level: number): string {
+  return `${DAILY_PATH}/${dateStr}/${level}`;
+}
+
+/** Where an old daily address lives now, or null if `pathname` isn't one. */
+export function movedDailyPath(pathname: string): string | null {
+  const path = pathname.replace(/\/+$/, "");
+  if (path === "/archive" || path === "/past") return ARCHIVE_PATH;
+  const day = /^\/(\d{4}-\d{2}-\d{2}\/[^/]+)$/.exec(path);
+  return day ? `${DAILY_PATH}/${day[1]}` : null;
 }

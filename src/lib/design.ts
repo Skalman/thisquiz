@@ -1,31 +1,14 @@
+import { DAILY_PATH } from "../puzzles/daily.ts";
+
 /** The app's look: zen or play. */
 export type Design = "zen" | "play";
 
-export const DESIGNS: readonly Design[] = ["zen", "play"];
-
-export function isDesign(value: unknown): value is Design {
-  return DESIGNS.some((design) => design === value);
+/** Whether `path` is the section at `base`, or a page in it. */
+export function inSection(path: string, base: string): boolean {
+  return path === base || path.startsWith(`${base}/`);
 }
 
-const DESIGN_KEY = "refpuzzle:design";
-
-/** Fired on the window when this tab stores a new design. */
-export const DESIGN_CHANGE = "refpuzzle:design-change";
-
-/** The design the player picked on this device; zen until they pick. */
-export function storedDesign(): Design {
-  try {
-    const value = localStorage.getItem(DESIGN_KEY);
-    return isDesign(value) ? value : "zen";
-  } catch {
-    return "zen";
-  }
-}
-
-export function storeDesign(design: Design): void {
-  try {
-    if (design === "zen") localStorage.removeItem(DESIGN_KEY);
-    else localStorage.setItem(DESIGN_KEY, design);
-  } catch {}
-  window.dispatchEvent(new Event(DESIGN_CHANGE));
+/** Each section has its own look: the daily pages are zen, everything else is play. */
+export function designForPath(path: string): Design {
+  return inSection(path, DAILY_PATH) ? "zen" : "play";
 }

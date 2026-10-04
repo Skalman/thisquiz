@@ -1,10 +1,9 @@
-import { AppHeader } from "./AppHeader.tsx";
+import { DailyHeader } from "./DailyHeader.tsx";
 import { LevelRail } from "./LevelRail.tsx";
-import { useBackupFlow, BackupDialogs } from "./BackupFlow.tsx";
 import { classNames, tw } from "../lib/classNames.ts";
 import { useRevalidated } from "../lib/hooks.ts";
 import { useToday } from "../lib/today.ts";
-import { LEVELS, dateStrFromOffset, isValidDate } from "../puzzles/daily.ts";
+import { LEVELS, dailyPuzzlePath, dateStrFromOffset, isValidDate } from "../puzzles/daily.ts";
 import { dayStates, isSolved, resumeLevel } from "../puzzles/progress.ts";
 import { t } from "../i18n/index.ts";
 import type { Design } from "../lib/design.ts";
@@ -105,7 +104,7 @@ function ArchiveDay({ dateStr, day, isToday }: { dateStr: string; day: number; i
 
   return (
     <a
-      href={`/${dateStr}/${target}`}
+      href={dailyPuzzlePath(dateStr, target)}
       class={classNames(
         DAY_BOX,
         DAY[design].box,
@@ -191,7 +190,6 @@ function ArchiveMonth({ ym, today }: { ym: string; today: string }) {
 
 export function ArchivePage() {
   const s = t();
-  const backup = useBackupFlow();
   const today = useToday();
   useRevalidated();
 
@@ -206,7 +204,7 @@ export function ArchivePage() {
 
   return (
     <>
-      <AppHeader onBackup={backup.openBackup} />
+      <DailyHeader />
 
       <div class="mx-auto max-w-150 p-2 sm:p-4">
         <h2 class="mb-4 text-[1.5em] font-bold">{s.daily.archive}</h2>
@@ -214,8 +212,6 @@ export function ArchivePage() {
           <ArchiveMonth key={ym} ym={ym} today={today} />
         ))}
       </div>
-
-      <BackupDialogs backup={backup} exportFilename="refpuzzle-backup.json" />
     </>
   );
 }

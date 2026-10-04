@@ -1,4 +1,4 @@
-import { test, expect, cell, s } from "./fixtures.ts";
+import { test, expect, cell, s, DAY_ONE_L1 } from "./fixtures.ts";
 import type { Locator, Page } from "@playwright/test";
 import { TUTORIAL_PUZZLES, type TutorialPuzzle } from "../src/puzzles/tutorial.ts";
 
@@ -96,11 +96,11 @@ test("a first visit opens the tutorial", async ({ page }) => {
   await expect(stepText(page)).toBeVisible();
 });
 
-test("a visit with progress stays on the day", async ({ page }) => {
+test("a visit with progress stays on the overview", async ({ page }) => {
   await freshDevice(page);
   await page.addInitScript(() => localStorage.setItem("refpuzzle:puzzle:/2026-04-19/1", "x"));
   await page.goto("/");
-  await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
+  await expect(page.getByTestId("overview-daily")).toBeVisible();
   await expect(page).not.toHaveURL(/\/tutorial$/);
 });
 
@@ -110,50 +110,72 @@ test.describe("as a crawler", () => {
       "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
   });
 
-  test("a first visit stays on the day", async ({ page }) => {
+  test("a first visit stays on the overview", async ({ page }) => {
     await freshDevice(page);
     await page.goto("/");
-    await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
+    await expect(page.getByTestId("overview-daily")).toBeVisible();
     await expect(page).not.toHaveURL(/\/tutorial$/);
   });
 });
 
-test("skipping lands on today with the tutorial retired", async ({ page }) => {
+test("skipping offers the two ways onward, with the tutorial retired", async ({ page }) => {
   await freshDevice(page);
   await page.goto("/tutorial");
   await page.getByTestId("tutorial-skip").click();
-  await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
+  await expect(page.getByTestId("tutorial-skip")).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.getItem("refpuzzle:tutorial"))).toBe("1");
+  await page.getByTestId("tutorial-daily").click();
+  await expect(page).toHaveURL(/\/daily$/);
+  await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
 });
 
-test("the Intro puzzle links to the tutorial", async ({ page }) => {
-  await page.goto("/");
+test("skipping then choosing the Adventure opens its map", async ({ page }) => {
+  await freshDevice(page);
+  await page.goto("/tutorial");
+  await page.getByTestId("tutorial-skip").click();
+  await page.getByTestId("tutorial-adventure").click();
+  await expect(page).toHaveURL(/\/adventure$/);
+});
+
+test("the first level links to the tutorial", async ({ page }) => {
+  await page.goto("/daily");
   await page.getByTestId("take-tutorial").click();
   await expect(page).toHaveURL(/\/tutorial$/);
 });
 
 test("skipping a linked tutorial returns to the page it came from", async ({ page }) => {
-  await page.goto("/2026-04-19/1");
+  await page.goto(DAY_ONE_L1);
   await page.getByTestId("take-tutorial").click();
   await expect(page).toHaveURL(/\/tutorial$/);
   await page.getByTestId("tutorial-skip").click();
-  await expect(page).toHaveURL(/\/2026-04-19\/1$/);
+  await expect(page).toHaveURL(new RegExp(`${DAY_ONE_L1}$`));
 });
 
-test("the script walks through to today's puzzle", async ({ page }) => {
+/** Plays the whole script, stopping on the last puzzle's destinations. */
+async function walkScript(page: Page) {
   await freshDevice(page);
   await page.goto("/tutorial");
   await passOpening(page);
   for (const puzzle of TUTORIAL_PUZZLES) {
     await playPuzzle(page, puzzle);
+    const last = puzzle === TUTORIAL_PUZZLES.at(-1);
     // Skip stays until the last puzzle is solved.
-    await expect(page.getByTestId("tutorial-skip")).toHaveCount(
-      puzzle === TUTORIAL_PUZZLES.at(-1) ? 0 : 1,
-    );
-    await page.getByTestId("tutorial-next").click();
+    await expect(page.getByTestId("tutorial-skip")).toHaveCount(last ? 0 : 1);
+    if (!last) await page.getByTestId("tutorial-next").click();
   }
-  await expect(page).toHaveURL(/\/$/);
+}
+
+test("the script walks through to today's puzzle", async ({ page }) => {
+  await walkScript(page);
+  await page.getByTestId("tutorial-daily").click();
+  await expect(page).toHaveURL(/\/daily$/);
   await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem("refpuzzle:tutorial"))).toBe("1");
+});
+
+test("the script's Adventure destination opens the map", async ({ page }) => {
+  await walkScript(page);
+  await page.getByTestId("tutorial-adventure").click();
+  await expect(page).toHaveURL(/\/adventure$/);
+  await expect(page.getByTestId("adventure-step").first()).toBeVisible();
 });

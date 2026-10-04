@@ -87,7 +87,7 @@ export function useIdleNudge({
       armedAt = Date.now();
       timer = window.setTimeout(fire, wait);
     }
-    function noteActivity() {
+    function onActive() {
       // `arm` clears the flag, so the event that reopened the window counts in it.
       if (waiting) arm();
       active = true;
@@ -98,7 +98,7 @@ export function useIdleNudge({
       if (present()) arm();
     }
 
-    const stopListening = onActivity(noteActivity);
+    const stopListening = onActivity(onActive);
     document.addEventListener("visibilitychange", onPresence);
     window.addEventListener("focus", onPresence);
     window.addEventListener("blur", onPresence);

@@ -63,16 +63,58 @@ export function TutorialPanel({
   );
 }
 
-/** The tutorial's way on: holds its place unseen, then fades in when `shown`. */
+/** Where the tutorial can send the player, with its own button. */
+export interface TutorialDestination {
+  label: string;
+  testId: string;
+  onClick: () => void;
+}
+
+/** The destinations, alone on the page: what skipping the tutorial leads to. */
+export function TutorialDestinations({
+  copy,
+  destinations,
+}: {
+  copy: StepCopy;
+  destinations: TutorialDestination[];
+}) {
+  return (
+    <div
+      class="flex flex-col items-center gap-6 px-4 text-center"
+      data-testid="tutorial-destinations"
+    >
+      <div class={classNames(COACH_TEXT, "max-w-lg space-y-1.5 text-default")}>
+        {copy.lead && <p class="font-semibold">{copy.lead}</p>}
+        <p>{copy.text}</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        {destinations.map((destination) => (
+          <Button
+            key={destination.testId}
+            variant="next"
+            onClick={destination.onClick}
+            data-testid={destination.testId}
+          >
+            {destination.label} &rarr;
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** The tutorial's Next: holds its place unseen, then fades in when `shown`. */
 export function TutorialNext({
   shown,
   label = t().tutorial.next,
   class: extraClass,
+  testId = "tutorial-next",
   onClick,
 }: {
   shown: boolean;
   label?: string;
   class?: string;
+  testId?: string;
   onClick: () => void;
 }) {
   return (
@@ -80,7 +122,7 @@ export function TutorialNext({
       variant="next"
       class={classNames(shown ? "motion-safe:animate-tutorial-next" : "invisible", extraClass)}
       onClick={onClick}
-      data-testid="tutorial-next"
+      data-testid={testId}
     >
       {label} &rarr;
     </Button>

@@ -6,7 +6,7 @@ import { useShareable } from "../lib/hooks.ts";
 import { hostOf } from "../lib/share.ts";
 import { Dialog } from "./ui/Dialog.tsx";
 import { Button, ButtonLink } from "./ui/Button.tsx";
-import { dayNumber } from "../puzzles/daily.ts";
+import { ARCHIVE_PATH, dayNumber } from "../puzzles/daily.ts";
 import type { QuestionOutcome, SolveStats } from "../lib/solve-summary.ts";
 import { IconAlert, IconClock, IconHint, IconPin, IconShare, IconUndo } from "./Icons.tsx";
 import { Brand } from "./Brand.tsx";
@@ -256,7 +256,7 @@ export function SolvedDialog({
           </Button>
         )}
         {hasNext ? (
-          <ButtonLink variant="ghost" href="/archive">
+          <ButtonLink variant="ghost" href={ARCHIVE_PATH}>
             {s.daily.archive}
           </ButtonLink>
         ) : (
@@ -264,7 +264,7 @@ export function SolvedDialog({
             variant="primary"
             size="lg"
             class="w-full shadow-[0_0_12px_var(--accent-soft)]"
-            href="/archive"
+            href={ARCHIVE_PATH}
             autofocus
           >
             {s.daily.archive} &rarr;

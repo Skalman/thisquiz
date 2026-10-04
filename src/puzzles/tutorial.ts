@@ -133,8 +133,8 @@ export function markTutorialDone(): void {
 /** The page a link opened the tutorial from; null when it opened by itself. */
 let openedFrom: string | null = null;
 
-/** Notes the current page, for a tutorial opened by a link to return to. */
-export function noteTutorialOpener(): void {
+/** Remembers the current page, for a tutorial opened by a link to return to. */
+export function rememberTutorialOpener(): void {
   openedFrom = window.location.pathname;
 }
 

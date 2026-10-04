@@ -11,6 +11,14 @@ import { track, getClientInfo } from "../lib/analytics.ts";
  */
 const IDLE_CUTOFF_MS = 3 * 60_000;
 
+/** A puzzle as its events name it: a daily level, an Adventure puzzle, or a playground puzzle. */
+export interface TrackedPuzzle {
+  puzzleId: string;
+  mode: "daily" | "adventure" | "playground";
+  /** The daily level. */
+  level?: number;
+}
+
 /**
  * The puzzle's counters and its solve clock. The clock runs from the first
  * mark while the tab is visible and the puzzle unsolved, and stops at the last
@@ -19,15 +27,14 @@ const IDLE_CUTOFF_MS = 3 * 60_000;
  * Like the board, the counters are this tab's own: with two tabs on one
  * puzzle, the last to write wins.
  */
-export function useAnalytics(
-  puzzleId: string,
-  opts: {
-    level: number;
-    initialHash?: string | null;
-    initStarted: boolean;
-    initCompleted: boolean;
-  },
-) {
+export function useAnalytics(opts: {
+  /** Which puzzle this is, on every event it sends. */
+  trackedPuzzle: TrackedPuzzle;
+  initialHash?: string | null;
+  initStarted: boolean;
+  initCompleted: boolean;
+}) {
+  const { puzzleId } = opts.trackedPuzzle;
   const wasStarted = useRef(opts.initStarted);
   const wasCompleted = useRef(opts.initCompleted);
   // `useRef`'s argument is evaluated on every render, so the load runs here.
@@ -84,7 +91,7 @@ export function useAnalytics(
 
   useEffect(() => {
     const actions = () => clockActions.current;
-    function noteActivity() {
+    function onActive() {
       const now = Date.now();
       const c = clock.current;
       if (c.runningSince !== null && now - c.lastActivity > IDLE_CUTOFF_MS) {
@@ -101,7 +108,7 @@ export function useAnalytics(
     }
 
     if (!document.hidden) actions().startClock(Date.now());
-    const stopListening = onActivity(noteActivity);
+    const stopListening = onActivity(onActive);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       actions().stopClock(actions().settledEnd(Date.now()));
@@ -115,11 +122,7 @@ export function useAnalytics(
     wasStarted.current = true;
     if (opts.initialHash) meta.current.fromShared = true;
     startClock(Date.now());
-    track("puzzle_started", {
-      puzzleId,
-      level: opts.level,
-      ...getClientInfo(),
-    });
+    track("puzzle_started", { ...opts.trackedPuzzle, ...getClientInfo() });
   }
 
   /** Lands the in-memory counters once the puzzle has a stored entry to hold them. */

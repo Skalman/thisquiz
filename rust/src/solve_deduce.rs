@@ -55,11 +55,11 @@ impl EngineConfig {
         }
     }
     /// Used as the break-glass fallback: `check`'s full-depth tier and un-vetted
-    /// (playground) puzzles `standard` can't finish. Uniqueness-assuming `deduce`,
-    /// unbounded lookahead — searches to any depth. Because `deduce` isn't confluent,
-    /// the extra depth can strand a rule and leave it stuck on a puzzle `standard`
-    /// solves at recipe depth, so it is not reliably stronger — a `check` warning, not
-    /// a failure.
+    /// (playground) puzzles `standard` can't finish, and Adventure gen's acceptance
+    /// gate. Uniqueness-assuming `deduce`, unbounded lookahead — searches to any
+    /// depth. Because `deduce` isn't confluent, the extra depth can strand a rule and
+    /// leave it stuck on a puzzle `standard` solves at recipe depth, so it is not
+    /// reliably stronger — a `check` warning, not a failure.
     pub fn fallback() -> Self {
         Self {
             assuming_unique: true,

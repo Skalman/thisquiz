@@ -2,6 +2,7 @@
 //! into the wasm library): each orchestrates the crate-root engine modules and
 //! handles argument-driven I/O for one subcommand.
 
+pub mod adventure;
 pub mod check;
 pub mod diagnose;
 pub mod hint_dump;

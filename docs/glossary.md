@@ -71,7 +71,34 @@ A puzzle is a grid: `n` **questions** down, `option_count` **options** across.
 - **result card** — the shareable picture of a solve: level, day, time, and one
   square per question in its outcome's color.
 - **completion bar** — the row of ways onward that replaces the controls in the dock
-  once the board is solved: Summary, and Next puzzle or Archive.
+  once the board is solved: Play again, Summary, and Next puzzle or Archive; in the
+  Adventure, Play again and Continue to the map.
+- **section** — one part of the app with its own look: the overview (`/`), the
+  tutorial, the Adventure (`/adventure`), and the daily puzzles (`/daily`). The daily
+  pages are zen; every other section is play. Unrelated to the `text-section` type size
+  and the HTML `<section>` element. The overview shows a **window** onto the Adventure
+  and the daily puzzles.
+- **Adventure** — an endless path of **steps**, unlocked in turn. Each step offers one
+  small puzzle per **size** joined so far: 2×2, then 2×3 from step 30, 3×2 from 60,
+  3×3 from 100. Solving any one completes the step. A size is written options ×
+  questions, as the grid is wide and tall, and that's also its **size key** (`3x2` is
+  2 questions of 3 options). The puzzles come from one list per size
+  (`public/puzzles/adventure.json`, from `refpuzzle gen adventure`). Hint is the only
+  tool; a solve without hints earns that puzzle's **star**, kept through a replay.
+- **step** — on its own, one of the Adventure's. Elsewhere it's always qualified: a
+  **history step** (one entry in a board's history), a **tutorial step** (one part of
+  a tutorial puzzle's script) or a **hint step** (one level of a hint).
+- **world** — a hundred steps of the Adventure on a **map** of its own. Steps count
+  along the whole path, so World 2 runs from 101 to 200. Finishing a world earns a
+  **diamond** and unlocks the next.
+- **step status** — **locked** (not reached yet), **next** (the **reached** step: the
+  furthest one unlocked), or **done** (before it).
+- **last played** — the step the player last played, kept for the tab's session; the map
+  **rings** it. The overview's strip of steps rings the reached step instead.
+- **expanded** — a step with more than one size, pressed: its sizes show around it,
+  over the path, until a press elsewhere or Escape.
+- **streak** — days in a row, by the device's date, with any puzzle solved, except in
+  the tutorial and the playground.
 
 ## Related
 

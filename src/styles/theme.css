@@ -41,12 +41,13 @@
   /* The per-theme source behind the `shadow-dropdown` utility; named apart from
      it, since the utility maps this variable. */
   --dropdown-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --level-color-intro: #94a3b8;
-  --level-color-beginner: #22c55e;
-  --level-color-easy: #60a5fa;
-  --level-color-medium: #eab308;
-  --level-color-hard: #e85d04;
-  --level-color-expert: #d42a4a;
+  /* Each daily level's color, first to last. */
+  --level-color-1: #94a3b8;
+  --level-color-2: #22c55e;
+  --level-color-3: #60a5fa;
+  --level-color-4: #eab308;
+  --level-color-5: #e85d04;
+  --level-color-6: #d42a4a;
 
   /* Play's per-letter colors, deep text shades and tints. */
   --letter-a: #ffc400;
@@ -72,6 +73,13 @@
     rgb(255 255 255 / 0) 52%
   );
   --gloss-shade: inset 0 -3px 0 rgb(0 0 0 / 0.07);
+  /* Play's gloss on a full letter color, as strong in either theme. */
+  --gloss-bright: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.6),
+    rgb(255 255 255 / 0.12) 48%,
+    rgb(255 255 255 / 0) 52%
+  );
 
   /* A letter on its tint, darkened to read; bright when dark. */
   --letter-a-text: color-mix(in srgb, var(--letter-a), var(--on-letter-a) 70%);
@@ -83,6 +91,9 @@
   /* The scrim behind every dialog; the dark themes deepen it, since their
      page is already near-black. */
   --backdrop: rgba(0, 0, 0, 0.4);
+  /* The Adventure's arrow tile, in this theme's text color; drawn by
+     scripts/gen-arrows.mjs. */
+  --arrows-tile: url("/arrows-light.svg");
   /* Scanners need a light quiet zone, so this stays white in dark mode too. */
   --qr-bg: #ffffff;
 }
@@ -109,7 +120,8 @@
   --neutral-bar: #4b5563;
   --dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   --backdrop: rgba(0, 0, 0, 0.6);
-  --level-color-intro: #cbd5e1;
+  --arrows-tile: url("/arrows-dark.svg");
+  --level-color-1: #cbd5e1;
   --letter-a: #fbbf24;
   --letter-b: #7ab8ff;
   --letter-c: #e879f9;
@@ -151,7 +163,8 @@
     --neutral-bar: #4b5563;
     --dropdown-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     --backdrop: rgba(0, 0, 0, 0.6);
-    --level-color-intro: #cbd5e1;
+    --arrows-tile: url("/arrows-dark.svg");
+    --level-color-1: #cbd5e1;
     --letter-a: #fbbf24;
     --letter-b: #7ab8ff;
     --letter-c: #e879f9;

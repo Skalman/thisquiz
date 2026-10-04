@@ -190,47 +190,6 @@ export function IconCalendar(p: Props) {
   );
 }
 
-// Sun
-export function IconSun(p: Props) {
-  return (
-    <IM
-      {...p}
-      paths={[
-        "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
-        "M12 2v2",
-        "M12 20v2",
-        "m4.93 4.93 1.41 1.41",
-        "m17.66 17.66 1.41 1.41",
-        "M2 12h2",
-        "M20 12h2",
-        "m6.34 17.66-1.41 1.41",
-        "m19.07 4.93-1.41 1.41",
-      ]}
-    />
-  );
-}
-
-// Moon
-export function IconMoon(p: Props) {
-  return <I {...p} d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />;
-}
-
-// Sun+Moon (auto theme)
-export function IconSunMoon(p: Props) {
-  return (
-    <IM
-      {...p}
-      paths={[
-        "M12 2v2",
-        "M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715",
-        "M16 12a4 4 0 0 0-4-4",
-        "m19 5-1.256 1.256",
-        "M20 12h2",
-      ]}
-    />
-  );
-}
-
 // Help circle
 export function IconHelp(p: Props) {
   return (
@@ -277,5 +236,64 @@ export function IconDot({ size, class: cls }: Props) {
     <svg xmlns="http://www.w3.org/2000/svg" width={s} height={s} viewBox="0 0 24 24" class={cls}>
       <circle cx="12" cy="12" r="5" fill="currentColor" />
     </svg>
+  );
+}
+
+// Star (an Adventure puzzle solved without hints), filled.
+export function IconStar({ size, class: cls }: Props) {
+  const s = size ?? defaults.size;
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={s} height={s} viewBox="0 0 24 24" class={cls}>
+      <path
+        fill="currentColor"
+        d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+      />
+    </svg>
+  );
+}
+
+// Gem (a diamond: every hundred Adventure steps)
+export function IconDiamond(p: Props) {
+  return <IM {...p} paths={["M6 3h12l4 6-10 13L2 9Z", "M11 3 8 9l4 13 4-13-3-6", "M2 9h20"]} />;
+}
+
+// Flame (the streak)
+export function IconFlame(p: Props) {
+  return (
+    <I
+      {...p}
+      d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+    />
+  );
+}
+
+// House (the overview)
+export function IconHome(p: Props) {
+  return (
+    <IM
+      {...p}
+      paths={[
+        "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
+        "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+      ]}
+    />
+  );
+}
+
+// Arrow left (back)
+export function IconArrowLeft(p: Props) {
+  return <IM {...p} paths={["m12 19-7-7 7-7", "M19 12H5"]} />;
+}
+
+// Gear (settings)
+export function IconSettings(p: Props) {
+  return (
+    <IM
+      {...p}
+      paths={[
+        "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+        "M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0",
+      ]}
+    />
   );
 }

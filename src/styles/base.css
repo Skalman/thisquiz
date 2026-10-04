@@ -43,12 +43,29 @@ html {
   background: var(--bg);
   color: var(--text);
   line-height: 1.4;
+  /* A page that scrolls and one that doesn't keep the same width, so nothing
+     edge-aligned shifts between them. */
+  scrollbar-gutter: stable;
 }
 
 body {
+  /* Anchors the arrows below to the whole page, not the viewport. */
+  position: relative;
   min-height: 100vh;
   min-height: 100svh;
   font-size: var(--text-body);
+}
+
+/* The Adventure's arrows: huge and faint behind the whole page, scrolling
+   with it. The tile grows with a wide screen, so the repeat stays rare. A plain
+   background, not a mask: a mask over a page-tall layer stalls Firefox. */
+html[data-arrows] body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--arrows-tile) center top / max(1280px, 140vw) auto repeat;
 }
 
 /* ── Root font-size ladder ──

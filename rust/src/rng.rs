@@ -51,7 +51,7 @@ impl Rng {
         self.s
     }
 
-    pub(crate) fn shuffle<T>(&mut self, arr: &mut [T]) {
+    pub fn shuffle<T>(&mut self, arr: &mut [T]) {
         for i in (1..arr.len()).rev() {
             let j = self.int(0, i as i32) as usize;
             arr.swap(i, j);

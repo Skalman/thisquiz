@@ -1,13 +1,4 @@
-import {
-  test,
-  expect,
-  s,
-  cell,
-  markCorrect,
-  solveDayOneL1,
-  DAY_ONE,
-  DAY_ONE_L1,
-} from "./fixtures.ts";
+import { test, expect, s, cell, markCorrect, solveDayOneL1, DAY_ONE_L1 } from "./fixtures.ts";
 
 /** The stored entry for day-one level 1, ledger included. */
 function storedEntry(page: import("@playwright/test").Page) {
@@ -51,7 +42,7 @@ test("the next-puzzle button moves to level 2", async ({ page }) => {
     "aria-selected",
     "true",
   );
-  await expect(page).toHaveURL(/\/2026-04-19\/2$/);
+  await expect(page).toHaveURL(/\/daily\/2026-04-19\/2$/);
 });
 
 test("a solved board is still solved after a reload", async ({ page }) => {
@@ -82,7 +73,7 @@ test("solving keeps the history the player built", async ({ page }) => {
 test("a board that arrives already solved is recorded as solved", async ({ page }) => {
   // The hash encodes the full correct board, so nothing here is the player's own
   // doing — this is the arrival the completion check exists to catch.
-  await page.goto(`/${DAY_ONE}/1#1A.2A.3A`);
+  await page.goto(`${DAY_ONE_L1}#1A.2A.3A`);
 
   await expect(completionBar(page)).toBeVisible();
   await expect(async () => {

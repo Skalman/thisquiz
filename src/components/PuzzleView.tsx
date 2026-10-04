@@ -12,6 +12,7 @@ import { decodeShareHash, getPuzzleUrl } from "../lib/share.ts";
 import { guarded, initRovingTabindex } from "../lib/keyboard.ts";
 import { debugEnabled } from "../lib/debug.ts";
 import { track, getClientInfo } from "../lib/analytics.ts";
+import { extendStreak } from "../lib/streak.ts";
 import { t } from "../i18n/index.ts";
 import { QuestionRow } from "./QuestionRow.tsx";
 import type { SweepKind } from "./OptionButton.tsx";
@@ -23,17 +24,18 @@ import {
 } from "./HistoryStrip.tsx";
 import { questionOutcomes, storedSolveStats } from "../lib/solve-summary.ts";
 import { TutorialArrow } from "./TutorialArrow.tsx";
+import { IconStar } from "./Icons.tsx";
 import { NudgeCallout } from "./NudgeCallout.tsx";
 import { useForceUpdate, useVisibleTimeout } from "../lib/hooks.ts";
-import { useAnalytics } from "./useAnalytics.ts";
+import { useAnalytics, type TrackedPuzzle } from "./useAnalytics.ts";
 import { useHintEngine } from "./useHintEngine.ts";
 import { PuzzleShareDialog, type ShareMode } from "./PuzzleShareDialog.tsx";
 import { SolvedDialog } from "./SolvedDialog.tsx";
 import { useIdleNudge } from "./useIdleNudge.ts";
 import { useTutorial } from "./useTutorial.ts";
 import { confetti } from "../lib/confetti.ts";
-import { TutorialNext, TutorialPanel } from "./TutorialPanel.tsx";
-import { noteTutorialOpener, type TutorialPuzzle } from "../puzzles/tutorial.ts";
+import { TutorialNext, TutorialPanel, type TutorialDestination } from "./TutorialPanel.tsx";
+import { rememberTutorialOpener, type TutorialPuzzle } from "../puzzles/tutorial.ts";
 import { ButtonLink } from "./ui/Button.tsx";
 import {
   CheckpointNote,
@@ -43,7 +45,7 @@ import {
   ENABLED_CONTROL,
   PuzzleControls,
 } from "./PuzzleDock.tsx";
-import { LEVELS } from "../puzzles/daily.ts";
+import { LEVELS, todayDateStr } from "../puzzles/daily.ts";
 import { useDesign } from "./DesignContext.tsx";
 import { classNames, tw } from "../lib/classNames.ts";
 import type { Design } from "../lib/design.ts";
@@ -51,14 +53,20 @@ import type { Design } from "../lib/design.ts";
 /** A short board: one centered column. */
 const SHORT_BOARD = tw`mx-auto py-4 *:last:border-b-0`;
 
+/** A short board's width once wide; the Adventure's dock keeps to it too. */
+const SHORT_WIDTH: Record<Design, string> = {
+  zen: tw`lg:max-w-[min(50%,25rem)]`,
+  play: tw`xl:max-w-[min(50%,25rem)]`,
+};
+
 /** The question grid; play's goes two-column at a wider width. */
 const BOARD_GRID: Record<Design, { short: string; long: string }> = {
   zen: {
-    short: tw`lg:grid lg:max-w-[min(50%,25rem)] lg:grid-cols-1`,
+    short: classNames(tw`lg:grid lg:grid-cols-1`, SHORT_WIDTH.zen),
     long: tw`lg:grid lg:grid-flow-col lg:grid-cols-2 lg:gap-x-6`,
   },
   play: {
-    short: tw`xl:grid xl:max-w-[min(50%,25rem)] xl:grid-cols-1`,
+    short: classNames(tw`xl:grid xl:grid-cols-1`, SHORT_WIDTH.play),
     long: tw`xl:grid xl:grid-flow-col xl:grid-cols-2 xl:gap-x-6`,
   },
 };
@@ -151,9 +159,17 @@ interface PuzzleViewProps {
   /** Tutorial mode: only the step's cells take presses; controls, history and hints are off. */
   tutorial?: {
     puzzle: TutorialPuzzle;
-    /** The label of the Next button, which calls `onNextPuzzle`. */
-    nextLabel: string;
+    /** Destinations in place of Next, each its own button. */
+    destinations?: TutorialDestination[];
     onSolved: () => void;
+  };
+  /** Adventure mode: Hint is the only tool, and a solve leads back to the map. */
+  adventure?: {
+    /** The map the puzzle is on. */
+    mapPath: string;
+    /** Whether an earlier solve earned this puzzle its star. */
+    starred: boolean;
+    onSolved: (withoutHints: boolean) => void;
   };
   onNextPuzzle: () => void;
   onChanged: () => void;
@@ -167,6 +183,7 @@ export function PuzzleView({
   ephemeral,
   shareRef,
   tutorial,
+  adventure,
   onNextPuzzle,
   onChanged,
 }: PuzzleViewProps) {
@@ -182,8 +199,19 @@ export function PuzzleView({
   // Resolved before the first paint, so the stored board never flickers in.
   const [initState] = useState(() => initialBoardState(puzzle, initialHash, ephemeral));
 
-  const analytics = useAnalytics(puzzle.id, {
-    level,
+  const inAdventure = adventure !== undefined;
+  // How events name the puzzle; the tutorial sends none.
+  const trackedPuzzle = useMemo<TrackedPuzzle>(
+    () =>
+      inAdventure
+        ? { puzzleId: puzzle.id, mode: "adventure" }
+        : ephemeral
+          ? { puzzleId: puzzle.id, mode: "playground" }
+          : { puzzleId: puzzle.id, mode: "daily", level },
+    [inAdventure, ephemeral, puzzle.id, level],
+  );
+  const analytics = useAnalytics({
+    trackedPuzzle,
     initialHash,
     initStarted: initState.history.length > 1,
     initCompleted: initState.completed,
@@ -665,10 +693,10 @@ export function PuzzleView({
       historyRef.current[historyIdxRef.current],
     ).qi >= 0;
 
-  // Daily puzzles only.
+  // Stored puzzles only; the Adventure's nudges are toward Hint alone.
   const nudge = useIdleNudge({
     enabled: !ephemeral && hasProgress && !completed,
-    canCheckpoint,
+    canCheckpoint: canCheckpoint && !adventure,
     progressKey: questions,
   });
 
@@ -773,8 +801,7 @@ export function PuzzleView({
     finishClock();
     const m = analytics.meta.current;
     track("puzzle_completed", {
-      puzzleId: puzzle.id,
-      level,
+      ...trackedPuzzle,
       elapsedS: m.elapsedS,
       sessions: m.sessions,
       // Zeroes drop to undefined.
@@ -785,9 +812,25 @@ export function PuzzleView({
       fromShared: m.fromShared || undefined,
       ...getClientInfo(),
     });
+    if (!ephemeral) extendStreak(todayDateStr());
+    // An Adventure solve celebrates on the board and leads on from the bar.
+    if (adventure) {
+      confetti();
+      adventure.onSolved(hintMarkers.current.size === 0);
+      return undefined;
+    }
     setSolvedDialog("celebrate");
     return undefined;
-  }, [completed, level, puzzle.id, analytics.meta, analytics.wasCompleted, finishClock, tutorial]);
+  }, [
+    completed,
+    trackedPuzzle,
+    analytics.meta,
+    analytics.wasCompleted,
+    finishClock,
+    tutorial,
+    adventure,
+    ephemeral,
+  ]);
 
   // Re-seed the toolbar's roving tabindex whenever its enabled set changes;
   // between those the arrow keys' own position stands.
@@ -954,11 +997,11 @@ export function PuzzleView({
     const bindings: Record<string, (ev: KeyboardEvent) => void> = {
       j: whileSolving(() => keyActionsRef.current.moveFocus(1, 0)),
       k: whileSolving(() => keyActionsRef.current.moveFocus(-1, 0)),
-      // The tutorial has no history, checkpoints or hints.
-      ...(inTutorial
+      // The tutorial has no history, checkpoints or hints; the Adventure has hints alone.
+      ...(inTutorial ? {} : { h: whileSolving(() => keyActionsRef.current.hint()) }),
+      ...(inTutorial || inAdventure
         ? {}
         : {
-            h: whileSolving(() => keyActionsRef.current.hint()),
             p: whileSolving(() => keyActionsRef.current.checkpoint()),
             "$mod+z": undoRedo(() => keyActionsRef.current.undo()),
             "$mod+Shift+z": undoRedo(() => keyActionsRef.current.redo()),
@@ -979,7 +1022,24 @@ export function PuzzleView({
       bindings[String(digit)] = whileSolving(() => keyActionsRef.current.digit(digit));
     }
     return tinykeys(window, bindings);
-  }, [inTutorial]);
+  }, [inTutorial, inAdventure]);
+
+  // What an Adventure solve's star rests on.
+  const withoutHints = hintMarkers.current.size === 0;
+
+  /** The hint and checkpoint notes, beside the controls. */
+  const notes = (
+    <>
+      {!completed && debugMode && hints.debugHints && <DebugHintPanel steps={hints.debugHints} />}
+      {!completed && !debugMode && hints.hintText && (
+        <HintPanel step={hints.hintText} onMore={hints.hasMore ? hints.handleHint : undefined} />
+      )}
+
+      {!completed && checkpointNote && (
+        <CheckpointNote text={checkpointNote} onDismiss={() => setCheckpointNote(null)} />
+      )}
+    </>
+  );
 
   return (
     <>
@@ -1048,37 +1108,34 @@ export function PuzzleView({
         {/* Stuck to the viewport's bottom while the board's tail is below it; z-index
             clears the tutorial's arrow. The negative top margin lays its border over the
             last row's own; the bottom padding covers the safe-area inset only while stuck.
-            The tutorial's dock holds only Next, so it goes unruled. */}
+            The tutorial's dock holds only Next, so it goes unruled. The Adventure's dock
+            hangs below its centered board, out of the flow, so the board never moves. */}
         <div
           class={classNames(
-            "sticky bottom-0 z-6 -mt-px -mb-(--safe-area-inset-bottom) bg-page pb-(--safe-area-inset-bottom)",
-            !tutorial && "border-t",
+            "z-6",
+            adventure
+              ? classNames("absolute inset-x-0 top-full mx-auto pb-safe-4", SHORT_WIDTH[design])
+              : "sticky bottom-0 -mt-px -mb-(--safe-area-inset-bottom) bg-page pb-(--safe-area-inset-bottom)",
+            // The daily dock is ruled off from the board.
+            !tutorial && !adventure && "border-t",
           )}
+          data-testid="puzzle-dock"
         >
-          {/* Hint display */}
-          {!completed && debugMode && hints.debugHints && (
-            <DebugHintPanel steps={hints.debugHints} />
-          )}
-          {!completed && !debugMode && hints.hintText && (
-            <HintPanel
-              step={hints.hintText}
-              onMore={hints.hasMore ? hints.handleHint : undefined}
-            />
-          )}
-
-          {!completed && checkpointNote && (
-            <CheckpointNote text={checkpointNote} onDismiss={() => setCheckpointNote(null)} />
-          )}
+          {!adventure && notes}
 
           {/* Controls and the history track share a line while the track is
               short; a long track wraps onto its own. Solved, the controls go
-              and the completion bar stands at the row's end instead. */}
-          <div class="flex flex-wrap items-center gap-x-3">
+              and the completion bar stands at the row's end, or centered in
+              the Adventure. */}
+          <div
+            class={classNames("flex flex-wrap items-center gap-x-3", adventure && "justify-center")}
+          >
             {!completed && !tutorial && (
               <PuzzleControls
                 toolbarRef={controlsRef}
                 checkpointRef={checkpointBtnRef}
                 hintRef={hintBtnRef}
+                hintOnly={inAdventure}
                 canUndo={canUndo}
                 canRedo={canRedo}
                 canCheckpoint={canCheckpoint}
@@ -1090,7 +1147,7 @@ export function PuzzleView({
               />
             )}
 
-            {historyRef.current.length > 1 && !tutorial && (
+            {historyRef.current.length > 1 && !tutorial && !adventure && (
               <HistoryStrip
                 history={historyRef.current}
                 currentIdx={historyIdxRef.current}
@@ -1103,9 +1160,37 @@ export function PuzzleView({
             )}
 
             {tutorial && (
-              <div class="ms-auto flex flex-none items-center py-2">
-                <TutorialNext shown={completed} label={tutorial.nextLabel} onClick={onNextPuzzle} />
+              <div class="ms-auto flex flex-none flex-wrap items-center justify-end gap-2 py-2">
+                {tutorial.destinations ? (
+                  tutorial.destinations.map((destination) => (
+                    <TutorialNext
+                      key={destination.testId}
+                      shown={completed}
+                      label={destination.label}
+                      testId={destination.testId}
+                      onClick={destination.onClick}
+                    />
+                  ))
+                ) : (
+                  <TutorialNext shown={completed} onClick={onNextPuzzle} />
+                )}
               </div>
+            )}
+            {/* An Adventure solve's star, or how to earn it. */}
+            {completed && adventure && (
+              <p
+                class="flex items-center gap-1.5 py-2 text-body font-semibold"
+                data-testid="adventure-star-note"
+              >
+                {withoutHints || adventure.starred ? (
+                  <>
+                    <IconStar class="text-pending" />
+                    {withoutHints ? s.adventure.starEarned : s.adventure.alreadyStarred}
+                  </>
+                ) : (
+                  s.adventure.starMissed
+                )}
+              </p>
             )}
             {/* The completion bar: the ways onward, at the end of the row.
                 The dialog carries its last two while it is up. */}
@@ -1115,6 +1200,7 @@ export function PuzzleView({
                 nextRef={setNextPuzzleRef}
                 quiet={solvedDialog !== null}
                 hasNext={level < LEVELS.length}
+                continueTo={adventure?.mapPath}
                 replayCue={replayCue}
                 onPlayAgain={handlePlayAgain}
                 onSummary={() => setSolvedDialog("summary")}
@@ -1122,13 +1208,13 @@ export function PuzzleView({
               />
             )}
 
-            {/* The Intro puzzle's way to the tutorial, on a line of its own. */}
-            {level === 1 && !ephemeral && !completed && (
+            {/* The first level's way to the tutorial, on a line of its own. */}
+            {level === 1 && !ephemeral && !adventure && !completed && (
               <div class="basis-full pb-2">
                 <ButtonLink
                   variant="outline"
                   href="/tutorial"
-                  onClick={noteTutorialOpener}
+                  onClick={rememberTutorialOpener}
                   data-testid="take-tutorial"
                 >
                   {s.tutorial.takeIt} &rarr;
@@ -1136,6 +1222,7 @@ export function PuzzleView({
               </div>
             )}
           </div>
+          {adventure && notes}
         </div>
       </div>
       {shareMode && (

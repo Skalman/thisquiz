@@ -1,4 +1,4 @@
-import { test, expect, cell, markCorrect, s, DAY_ONE, DAY_ONE_L1 } from "./fixtures.ts";
+import { test, expect, cell, markCorrect, s, DAY_ONE_L1 } from "./fixtures.ts";
 
 /** The dialog prints the URL with the protocol stripped and no trailing slash. */
 async function dialogUrl(page: import("@playwright/test").Page): Promise<string> {
@@ -18,7 +18,7 @@ test("the share dialog offers the puzzle's own URL", async ({ page }) => {
 
   await openShareDialog(page);
 
-  expect(await dialogUrl(page)).toMatch(new RegExp(`/${DAY_ONE}/1$`));
+  expect(await dialogUrl(page)).toMatch(new RegExp(`${DAY_ONE_L1}$`));
 });
 
 test("a shared progress URL restores the board on a clean device", async ({ page, browser }) => {
@@ -53,9 +53,9 @@ test("a shared progress URL restores the board on a clean device", async ({ page
 });
 
 /** A solved day-one level 1 board whose track carries one hint marker. */
-const SOLVED_WITH_HINT = `/${DAY_ONE}/1#v1.h1q1.1A.2A.3A`;
+const SOLVED_WITH_HINT = `${DAY_ONE_L1}#v1.h1q1.1A.2A.3A`;
 /** The same, one mark in and unsolved. */
-const STARTED_WITH_HINT = `/${DAY_ONE}/1#v1.h1q1.1A`;
+const STARTED_WITH_HINT = `${DAY_ONE_L1}#v1.h1q1.1A`;
 
 const ENTRY = "refpuzzle:puzzle:/2026-04-19/1";
 

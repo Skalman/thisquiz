@@ -2,6 +2,8 @@ import { useEffect, useState } from "preact/hooks";
 import type { ComponentChildren, Ref } from "preact";
 import type { ExplainStep } from "../engine/hint-types.ts";
 import { arrowNavHandler } from "../lib/keyboard.ts";
+import { classNames } from "../lib/classNames.ts";
+import { ARCHIVE_PATH } from "../puzzles/daily.ts";
 import { t } from "../i18n/index.ts";
 import { HintStep } from "./HintStep.tsx";
 import { IconUndo, IconRedo, IconPin, IconHint, IconReplay } from "./Icons.tsx";
@@ -73,11 +75,12 @@ export function CheckpointNote({ text, onDismiss }: { text: string; onDismiss: (
 /** The controls a press can land on, for the toolbar's arrow keys and tab stop. */
 export const ENABLED_CONTROL = "button:not(:disabled)";
 
-/** Undo, redo, checkpoint and hint, as one arrow-key toolbar. */
+/** Undo, redo, checkpoint and hint, as one arrow-key toolbar; `hintOnly` keeps just Hint. */
 export function PuzzleControls({
   toolbarRef,
   checkpointRef,
   hintRef,
+  hintOnly,
   canUndo,
   canRedo,
   canCheckpoint,
@@ -90,6 +93,7 @@ export function PuzzleControls({
   toolbarRef: Ref<HTMLDivElement>;
   checkpointRef: Ref<HTMLButtonElement>;
   hintRef: Ref<HTMLButtonElement>;
+  hintOnly?: boolean;
   canUndo: boolean;
   canRedo: boolean;
   canCheckpoint: boolean;
@@ -108,32 +112,36 @@ export function PuzzleControls({
       role="toolbar"
       onKeyDown={arrowNavHandler(ENABLED_CONTROL)}
     >
-      <Button
-        variant="outline-muted"
-        size="icon"
-        icon={<IconUndo />}
-        onClick={onUndo}
-        disabled={!canUndo}
-        title={s.puzzle.undo}
-      />
-      <Button
-        variant="outline-muted"
-        size="icon"
-        icon={<IconRedo />}
-        onClick={onRedo}
-        disabled={!canRedo}
-        title={s.puzzle.redo}
-      />
-      <Button
-        variant="ghost"
-        size="md-compact"
-        icon={<IconPin class="text-valid in-disabled:text-inherit" />}
-        ref={checkpointRef}
-        onClick={onCheckpoint}
-        disabled={!canCheckpoint}
-      >
-        {s.puzzle.checkpoint}
-      </Button>
+      {!hintOnly && (
+        <>
+          <Button
+            variant="outline-muted"
+            size="icon"
+            icon={<IconUndo />}
+            onClick={onUndo}
+            disabled={!canUndo}
+            title={s.puzzle.undo}
+          />
+          <Button
+            variant="outline-muted"
+            size="icon"
+            icon={<IconRedo />}
+            onClick={onRedo}
+            disabled={!canRedo}
+            title={s.puzzle.redo}
+          />
+          <Button
+            variant="ghost"
+            size="md-compact"
+            icon={<IconPin class="text-valid in-disabled:text-inherit" />}
+            ref={checkpointRef}
+            onClick={onCheckpoint}
+            disabled={!canCheckpoint}
+          >
+            {s.puzzle.checkpoint}
+          </Button>
+        </>
+      )}
       <Button
         variant="ghost"
         size="md-compact"
@@ -202,6 +210,7 @@ export function CompletionBar({
   nextRef,
   quiet,
   hasNext,
+  continueTo,
   replayCue,
   onPlayAgain,
   onSummary,
@@ -213,6 +222,8 @@ export function CompletionBar({
   /** While the solved dialog shows the same ways onward. */
   quiet: boolean;
   hasNext: boolean;
+  /** The Adventure's map: the bar leads back there, centered, with no Summary. */
+  continueTo?: string;
   /** Bumped per press on the solved board, cueing Play again. */
   replayCue: number;
   onPlayAgain: () => void;
@@ -225,20 +236,29 @@ export function CompletionBar({
   return (
     <div
       ref={barRef}
-      class="ms-auto flex flex-none items-center gap-2 self-start py-2"
+      class={classNames(
+        "flex flex-none items-center gap-2 self-start py-2",
+        !continueTo && "ms-auto",
+      )}
       data-testid="completion-bar"
       aria-label={s.puzzle.solved}
     >
       <PlayAgainButton onPlayAgain={onPlayAgain} cue={replayCue} />
-      <Button variant="ghost" onClick={onSummary}>
-        {s.puzzle.summary}
-      </Button>
-      {hasNext ? (
+      {!continueTo && (
+        <Button variant="ghost" onClick={onSummary}>
+          {s.puzzle.summary}
+        </Button>
+      )}
+      {continueTo ? (
+        <ButtonLink variant={nextVariant} ref={nextRef} href={continueTo}>
+          {s.adventure.continue} &rarr;
+        </ButtonLink>
+      ) : hasNext ? (
         <Button variant={nextVariant} ref={nextRef} onClick={onNext}>
           {s.puzzle.nextPuzzle} &rarr;
         </Button>
       ) : (
-        <ButtonLink variant={nextVariant} ref={nextRef} href="/archive">
+        <ButtonLink variant={nextVariant} ref={nextRef} href={ARCHIVE_PATH}>
           {s.daily.archive} &rarr;
         </ButtonLink>
       )}

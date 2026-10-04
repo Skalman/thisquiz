@@ -149,6 +149,7 @@ fn parse_date_range(input: &str) -> DateRange {
 
 fn print_help() {
     eprintln!("Usage: refpuzzle gen <date-range> -o FILE [options]");
+    eprintln!("       refpuzzle gen adventure -o FILE [--overwrite]   (Adventure corpus)");
     eprintln!("       refpuzzle check <file.json> [MMDD-level] [--json]");
     eprintln!("       refpuzzle check -   (reads a year map or single puzzle from stdin)");
     eprintln!("       refpuzzle format-check  (reads JSON from stdin)");
@@ -222,6 +223,36 @@ fn main() {
     }
 
     match args[1].as_str() {
+        "gen" if args.get(2).is_some_and(|a| a == "adventure") => {
+            let mut output_path: Option<String> = None;
+            let mut overwrite = false;
+            let mut i = 3;
+            while i < args.len() {
+                match args[i].as_str() {
+                    "--output" | "-o" => {
+                        output_path = Some(flag_value(&args, &mut i, "--output").to_string())
+                    }
+                    "--overwrite" => overwrite = true,
+                    other => {
+                        eprintln!("Unknown option: {other}");
+                        std::process::exit(1);
+                    }
+                }
+                i += 1;
+            }
+            let Some(output_path) = output_path else {
+                eprintln!("Error: -o/--output is required (use -o - for stdout)");
+                std::process::exit(1);
+            };
+            if output_path != "-" && !overwrite && std::path::Path::new(&output_path).is_file() {
+                eprintln!(
+                    "Error: output file {output_path} already exists. Pass --overwrite to replace it."
+                );
+                std::process::exit(1);
+            }
+            cli::adventure::gen_adventure(&output_path);
+            return;
+        }
         "gen" => {}
         "check" => {
             let mut file = None;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "preact/hooks";
+import { useState, useEffect, useCallback, useLayoutEffect, useMemo, useRef } from "preact/hooks";
 import { useForceUpdate, useRevalidated } from "./lib/hooks.ts";
 import { LocationProvider, Router, Route, useLocation } from "preact-iso";
 import { tinykeys } from "tinykeys";
@@ -10,10 +10,14 @@ import { joinSync } from "./lib/sync.ts";
 // QR components lazy-loaded via dynamic import (no preact dependency in chunks)
 import type { Puzzle } from "./engine/types.ts";
 import {
+  ARCHIVE_PATH,
+  DAILY_PATH,
   LEVELS,
+  dailyPuzzlePath,
   fetchDaily,
   dayNumber,
   isValidDate,
+  movedDailyPath,
   puzzleId,
   parseCompactPuzzle,
 } from "./puzzles/daily.ts";
@@ -32,43 +36,58 @@ import { isCrawler } from "./lib/crawler.ts";
 import { track, getClientInfo } from "./lib/analytics.ts";
 import { Button } from "./components/ui/Button.tsx";
 import { TutorialOpening } from "./components/TutorialOpening.tsx";
+import { TutorialDestinations, type TutorialDestination } from "./components/TutorialPanel.tsx";
 import { guarded } from "./lib/keyboard.ts";
 import { t } from "./i18n/index.ts";
 import { replayLogoAnimation } from "./components/Logo.tsx";
 import { ImportPreview } from "./components/ImportPreview.tsx";
-import { AppHeader } from "./components/AppHeader.tsx";
+import { DailyHeader } from "./components/DailyHeader.tsx";
 import { ArchivePage } from "./components/ArchivePage.tsx";
-import { useBackupFlow, BackupDialogs } from "./components/BackupFlow.tsx";
 import { ErrorOverlay } from "./components/ErrorOverlay.tsx";
 import { SafeAreaSimulator } from "./components/SafeAreaSimulator.tsx";
 import { InlineHelp } from "./components/InlineHelp.tsx";
 import { DifficultyTabs } from "./components/DifficultyTabs.tsx";
 import { PrintSheet } from "./components/PrintSheet.tsx";
-import { PageFooter } from "./components/PageFooter.tsx";
 import { Loading } from "./components/ui/Loading.tsx";
 import { NoticePage } from "./components/ui/NoticePage.tsx";
+import { Redirect } from "./components/ui/Redirect.tsx";
 import { Link } from "./components/ui/Link.tsx";
-import { adoptDebugParam } from "./lib/debug.ts";
-import { DesignContext, useStoredDesign } from "./components/DesignContext.tsx";
+import { adoptDebugParam, useDebugRevision } from "./lib/debug.ts";
+import type { ComponentChildren } from "preact";
+import { DesignContext, useSectionDesign } from "./components/DesignContext.tsx";
+import { AdventureMap, AdventurePuzzlePage } from "./components/AdventurePage.tsx";
+import { OverviewPage } from "./components/OverviewPage.tsx";
+import { ADVENTURE_PATH } from "./puzzles/adventure.ts";
+import { useThemeColorWatch } from "./lib/theme.ts";
+import { inSection } from "./lib/design.ts";
 
 adoptDebugParam();
 
-function DailyPage() {
-  const dateStr = useToday();
-  const { route } = useLocation();
-  // A device with no progress and no finished tutorial starts there; deep
-  // links land where they point, and crawlers index the day.
+// Old daily addresses move before the first render; bookmarks and shared links keep working.
+const movedPath = movedDailyPath(window.location.pathname);
+if (movedPath !== null) {
+  window.history.replaceState(
+    window.history.state,
+    "",
+    movedPath + window.location.search + window.location.hash,
+  );
+}
+
+/** The overview; a first visit, with no progress and no tutorial, starts in the tutorial. */
+function HomeRoute() {
+  // Deep links land where they point, and crawlers index the overview.
   const [toTutorial] = useState(() => !tutorialDone() && !hasAnyProgress() && !isCrawler());
-  useEffect(() => {
-    if (toTutorial) route("/tutorial", true);
-  }, [toTutorial, route]);
-  if (toTutorial) return <Loading />;
-  return <DayView dateStr={dateStr} />;
+  return toTutorial ? <Redirect to="/tutorial" /> : <OverviewPage />;
+}
+
+function DailyTodayRoute() {
+  return <DayView dateStr={useToday()} />;
 }
 
 /**
  * The guided tutorial, without the app's chrome: a lone cell, then its fixed
- * puzzles in turn; finishing or skipping goes to today.
+ * puzzles in turn. Finishing, or skipping on a first visit, offers the
+ * Adventure or today; skipping a tutorial a link opened goes back there.
  */
 function TutorialRoute() {
   const s = t();
@@ -79,6 +98,8 @@ function TutorialRoute() {
   const last = stage === TUTORIAL_PUZZLES.length;
   // The last puzzle solved: nothing left to skip.
   const [finished, setFinished] = useState(false);
+  // Skipped, with the ways onward in its place.
+  const [skipped, setSkipped] = useState(false);
   const puzzle = useMemo(
     () => (script ? { ...parseCompactPuzzle(script.compact), id: TUTORIAL_ID } : null),
     [script],
@@ -88,11 +109,21 @@ function TutorialRoute() {
     if (to !== null && to === tutorialOpener()) window.history.back();
     else route(to ?? "/", true);
   };
-  const next = () => (last ? leaveFor("/") : setStage(stage + 1));
+  const next = () => setStage(stage + 1);
+  const destinations: TutorialDestination[] = [
+    {
+      label: s.tutorial.playAdventure,
+      testId: "tutorial-adventure",
+      onClick: () => leaveFor(ADVENTURE_PATH),
+    },
+    { label: s.tutorial.playDaily, testId: "tutorial-daily", onClick: () => leaveFor(DAILY_PATH) },
+  ];
   function skip() {
     markTutorialDone();
     track("tutorial_skipped", getClientInfo());
-    leaveFor(tutorialOpener());
+    const opener = tutorialOpener();
+    if (opener === null) setSkipped(true);
+    else leaveFor(opener);
   }
   function solved() {
     if (!last) return;
@@ -104,7 +135,7 @@ function TutorialRoute() {
     // Centered in the viewport, less the page padding.
     <div class="flex min-h-screen-safe-4 flex-col justify-center">
       {/* Pinned to the viewport's corner, over the arrow; first in tab order. */}
-      {!finished && (
+      {!finished && !skipped && (
         <Button
           variant="ghost"
           class="fixed top-safe-4 right-safe-4 z-10 bg-page"
@@ -114,7 +145,9 @@ function TutorialRoute() {
           {s.tutorial.skip}
         </Button>
       )}
-      {script && puzzle ? (
+      {skipped ? (
+        <TutorialDestinations copy={s.tutorial.choose} destinations={destinations} />
+      ) : script && puzzle ? (
         <PuzzleView
           key={stage}
           puzzle={puzzle}
@@ -123,7 +156,7 @@ function TutorialRoute() {
           ephemeral
           tutorial={{
             puzzle: script,
-            nextLabel: last ? s.tutorial.play : s.tutorial.next,
+            destinations: last ? destinations : undefined,
             onSolved: solved,
           }}
           onNextPuzzle={next}
@@ -145,7 +178,6 @@ function DayView({ dateStr, initialLevel }: { dateStr: string; initialLevel?: nu
   const [puzzles, setPuzzles] = useState<Record<string, Puzzle> | null>(null);
   const [loading, setLoading] = useState(true);
   const forcePuzzleUpdate = useForceUpdate();
-  const backup = useBackupFlow({ onChanged: forcePuzzleUpdate });
   useRevalidated();
 
   const initialHash = window.location.hash.slice(1) || null;
@@ -159,7 +191,7 @@ function DayView({ dateStr, initialLevel }: { dateStr: string; initialLevel?: nu
   const selectLevel = useCallback(
     (level: number) => {
       setActiveLevel(level);
-      route(`/${dateStr}/${level}`, true);
+      route(dailyPuzzlePath(dateStr, level), true);
       replayLogoAnimation();
     },
     [dateStr, route],
@@ -236,15 +268,14 @@ function DayView({ dateStr, initialLevel }: { dateStr: string; initialLevel?: nu
 
   return (
     <>
-      <AppHeader
+      <DailyHeader
         onKeyboardHelp={() => setShowKeyboardHelp(true)}
         onPrint={puzzles ? () => window.print() : undefined}
         onShare={currentPuzzle ? () => shareRef.current?.open() : undefined}
-        onBackup={backup.openBackup}
       />
       <div class="flex items-center gap-4 px-4 py-2 text-section text-muted">
         {!isToday && (
-          <Link href="/archive" class="text-body">
+          <Link href={ARCHIVE_PATH} class="text-body">
             &larr; {s.daily.archive}
           </Link>
         )}
@@ -277,31 +308,21 @@ function DayView({ dateStr, initialLevel }: { dateStr: string; initialLevel?: nu
       <InlineHelp />
 
       {puzzles && <PrintSheet dateStr={dateStr} puzzles={puzzles} />}
-
-      <BackupDialogs backup={backup} exportFilename={`refpuzzle-backup-${dateStr}.json`} />
     </>
   );
-}
-
-/** The archive's old slug; kept so bookmarks and shared links survive. */
-function ArchiveRedirect() {
-  const { route } = useLocation();
-  useEffect(() => {
-    route("/archive", true);
-  }, [route]);
-  return null;
 }
 
 function DayRoute() {
   const s = t();
   const loc = useLocation();
+  // `/daily/<date>/<level>`.
   const parts = loc.path.split("/").filter(Boolean);
-  const dateStr = parts[0] ?? "";
-  const level = Number(parts[1]) || undefined;
+  const dateStr = parts[1] ?? "";
+  const level = Number(parts[2]) || undefined;
   if (!dateStr || !isValidDate(dateStr)) {
     return (
       <NoticePage title={s.notFound.noPuzzle} message={s.app.noPuzzle}>
-        <Link href="/">{s.notFound.backToToday}</Link>
+        <Link href={DAILY_PATH}>{s.notFound.backToToday}</Link>
       </NoticePage>
     );
   }
@@ -405,33 +426,47 @@ function NotFound() {
   );
 }
 
-/** The page footer, left off the tutorial. */
-function Footer() {
+/** The page's frame, in the current section's design. */
+function AppFrame({ children }: { children: ComponentChildren }) {
+  const design = useSectionDesign();
+  // The Adventure's arrows behind the page, set before the paint.
   const { path } = useLocation();
-  return path === "/tutorial" ? null : <PageFooter />;
+  const arrows = inSection(path, ADVENTURE_PATH);
+  useLayoutEffect(() => {
+    document.documentElement.toggleAttribute("data-arrows", arrows);
+  }, [arrows]);
+  return (
+    <DesignContext.Provider value={design}>
+      <div class="mx-auto max-w-272 p-safe-4" data-design={design}>
+        {children}
+      </div>
+    </DesignContext.Provider>
+  );
 }
 
 export function App() {
-  const design = useStoredDesign();
+  useThemeColorWatch();
+  const debugRevision = useDebugRevision();
   return (
     <LocationProvider>
-      <DesignContext.Provider value={design}>
-        <div class="mx-auto max-w-272 p-safe-4">
-          <ErrorOverlay />
-          <Router>
-            <Route path="/" component={DailyPage} />
-            <Route path="/archive" component={ArchivePage} />
-            <Route path="/past" component={ArchiveRedirect} />
-            <Route path="/sync" component={SyncRoute} />
-            <Route path="/playground" component={PlaygroundRoute} />
-            <Route path="/tutorial" component={TutorialRoute} />
-            <Route path="/:date/:level" component={DayRoute} />
-            <Route default component={NotFound} />
-          </Router>
-          <Footer />
-          {import.meta.env.DEV && <SafeAreaSimulator />}
-        </div>
-      </DesignContext.Provider>
+      {/* Remade whole when Debug switches change, the address kept. */}
+      <AppFrame key={debugRevision}>
+        <ErrorOverlay />
+        <Router>
+          <Route path="/" component={HomeRoute} />
+          <Route path="/tutorial" component={TutorialRoute} />
+          <Route path={ADVENTURE_PATH} component={AdventureMap} />
+          <Route path={`${ADVENTURE_PATH}/:world`} component={AdventureMap} />
+          <Route path={`${ADVENTURE_PATH}/:step/:size`} component={AdventurePuzzlePage} />
+          <Route path={DAILY_PATH} component={DailyTodayRoute} />
+          <Route path={ARCHIVE_PATH} component={ArchivePage} />
+          <Route path={`${DAILY_PATH}/:date/:level`} component={DayRoute} />
+          <Route path="/sync" component={SyncRoute} />
+          <Route path="/playground" component={PlaygroundRoute} />
+          <Route default component={NotFound} />
+        </Router>
+        {import.meta.env.DEV && <SafeAreaSimulator />}
+      </AppFrame>
     </LocationProvider>
   );
 }

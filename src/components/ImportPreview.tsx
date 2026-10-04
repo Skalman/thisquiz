@@ -1,5 +1,5 @@
 import { t } from "../i18n/index.ts";
-import type { ImportPlan, ImportAction } from "../lib/backup.ts";
+import { hasExtras, planChanges, type ImportPlan, type ImportAction } from "../lib/backup.ts";
 import { Dialog } from "./ui/Dialog.tsx";
 import { Button } from "./ui/Button.tsx";
 
@@ -30,9 +30,7 @@ export function ImportPreview({
     grouped.set(entry.action, list);
   }
   for (const list of grouped.values()) list.sort();
-  const hasChanges = plan.entries.some(
-    (e) => e.action === "new" || e.action === "replace-completed" || e.action === "replace-longer",
-  );
+  const hasChanges = planChanges(plan);
 
   return (
     <Dialog title={s.backup.uploadPreview} widthClass="max-w-136" onClose={onCancel}>
@@ -53,6 +51,15 @@ export function ImportPreview({
           </div>
         );
       })}
+      {hasExtras(plan) && (
+        <ul class="mb-3 ml-5 list-disc text-caption leading-normal text-muted">
+          {plan.newStars.length > 0 && <li>{s.backup.newStars(plan.newStars.length)}</li>}
+          {plan.streak && <li>{s.backup.streak(plan.streak.length)}</li>}
+          {plan.adventureReached !== null && (
+            <li>{s.backup.adventureReached(plan.adventureReached)}</li>
+          )}
+        </ul>
+      )}
       <div class="mt-4 flex items-center gap-4 border-t pt-3">
         {hasChanges ? (
           <>

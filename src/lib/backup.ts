@@ -1,4 +1,7 @@
+import { raiseStoredReached, storedReached } from "../puzzles/adventure.ts";
+import { addStars, loadStars } from "./stars.ts";
 import { migrateValue, isSolvedValue } from "./store.ts";
+import { loadStreak, mergedStreak, saveStreak, type Streak } from "./streak.ts";
 
 const PREFIX = "refpuzzle:puzzle:";
 const BACKUP_VERSION = 1;
@@ -7,6 +10,11 @@ interface BackupData {
   version: number;
   exportedAt: string;
   puzzles: Record<string, string>;
+  /** The ids of the puzzles with a star. */
+  stars?: string[];
+  streak?: Streak;
+  /** The Adventure's reached step, apart from the solves. */
+  adventureReached?: number;
 }
 
 export type ImportAction =
@@ -26,6 +34,28 @@ export interface ImportEntry {
 
 export interface ImportPlan {
   entries: ImportEntry[];
+  /** Stars this device doesn't hold yet. */
+  newStars: string[];
+  /** The streak joined with this device's, when that changes it. */
+  streak: Streak | null;
+  /** The Adventure's reached step, when it's further than this device's. */
+  adventureReached: number | null;
+}
+
+/** Whether the plan brings anything besides puzzles. */
+export function hasExtras(plan: ImportPlan): boolean {
+  return plan.newStars.length > 0 || plan.streak !== null || plan.adventureReached !== null;
+}
+
+/** Whether applying the plan changes anything. */
+export function planChanges(plan: ImportPlan): boolean {
+  return (
+    hasExtras(plan) ||
+    plan.entries.some(
+      (e) =>
+        e.action === "new" || e.action === "replace-completed" || e.action === "replace-longer",
+    )
+  );
 }
 
 export function exportData(): string {
@@ -44,6 +74,9 @@ export function exportData(): string {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
     puzzles,
+    stars: [...loadStars()].sort(),
+    streak: loadStreak() ?? undefined,
+    adventureReached: storedReached() || undefined,
   };
   return JSON.stringify(data, null, 2);
 }
@@ -89,7 +122,18 @@ export function planImport(json: string): ImportPlan {
     entries.push({ id, incoming, existing, action });
   }
 
-  return { entries };
+  const held = loadStars();
+  const newStars = Array.isArray(data.stars)
+    ? [...new Set(data.stars)].filter((id): id is string => typeof id === "string" && !held.has(id))
+    : [];
+
+  const reached = data.adventureReached;
+  const adventureReached =
+    typeof reached === "number" && Number.isInteger(reached) && reached > storedReached()
+      ? reached
+      : null;
+
+  return { entries, newStars, streak: mergedStreak(data.streak), adventureReached };
 }
 
 export function applyImport(plan: ImportPlan): {
@@ -112,6 +156,9 @@ export function applyImport(plan: ImportPlan): {
       skipped++;
     }
   }
+  addStars(plan.newStars);
+  if (plan.adventureReached !== null) raiseStoredReached(plan.adventureReached);
+  if (plan.streak) saveStreak(plan.streak);
 
   return { imported, replaced, skipped };
 }

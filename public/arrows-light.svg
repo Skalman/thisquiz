@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 2560" width="1280" height="2560">
+  <!-- The Adventure arrow tile for the light theme, from
+       scripts/gen-arrows.mjs: one arrow in the logo style per slot
+       of a 4 × 8 grid, each varied in size, turn and bend, so the tile
+       repeats too seldom to notice. Every arrow keeps inside its cell, so the
+       tiles meet without seams. -->
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="3" refY="5" markerWidth="2.2" markerHeight="2.2" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1a1a2e"/>
+    </marker>
+  </defs>
+  <g stroke="#1a1a2e" fill="#1a1a2e" opacity="0.05">
+    <path d="M87.6,204.1 A129.9,129.9 0 0,0 251.7,117.2" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="87.6" cy="204.1" r="34" stroke="none"/>
+    <path d="M548.4,149.5 A143.5,143.5 0 0,0 381,85.6" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="548.4" cy="149.5" r="34" stroke="none"/>
+    <path d="M877.7,133.9 A149.6,149.6 0 0,1 692.5,222.2" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="877.7" cy="133.9" r="34" stroke="none"/>
+    <path d="M1088.7,56.8 A146.2,146.2 0 0,1 1163.5,263.1" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1088.7" cy="56.8" r="34" stroke="none"/>
+    <path d="M196.5,416 A110.2,110.2 0 0,0 62.6,385.9" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="196.5" cy="416" r="34" stroke="none"/>
+    <path d="M574.6,406.8 A135.8,135.8 0 0,0 452.9,577.3" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="574.6" cy="406.8" r="34" stroke="none"/>
+    <path d="M724.8,443.5 A101.8,101.8 0 0,0 853.9,426" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="724.8" cy="443.5" r="34" stroke="none"/>
+    <path d="M1015.9,521.2 A139.5,139.5 0 0,0 1206.4,420" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1015.9" cy="521.2" r="34" stroke="none"/>
+    <path d="M83.5,745.4 A128.7,128.7 0 0,0 247.7,797" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="83.5" cy="745.4" r="34" stroke="none"/>
+    <path d="M427.9,693.2 A135.9,135.9 0 0,0 467.5,876" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="427.9" cy="693.2" r="34" stroke="none"/>
+    <path d="M723.8,808 A129.6,129.6 0 0,1 869,700" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="723.8" cy="808" r="34" stroke="none"/>
+    <path d="M1083.9,881.8 A138.6,138.6 0 0,0 1180.9,735.5" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1083.9" cy="881.8" r="34" stroke="none"/>
+    <path d="M243.4,1205.7 A146.6,146.6 0 0,1 95.6,1061.8" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="243.4" cy="1205.7" r="34" stroke="none"/>
+    <path d="M537.1,1191.1 A111.6,111.6 0 0,1 390.9,1120.1" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="537.1" cy="1191.1" r="34" stroke="none"/>
+    <path d="M701.6,1050.6 A138.3,138.3 0 0,0 875.9,1123" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="701.6" cy="1050.6" r="34" stroke="none"/>
+    <path d="M1216.7,1215.9 A142.2,142.2 0 0,1 1108.2,1040.9" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1216.7" cy="1215.9" r="34" stroke="none"/>
+    <path d="M233.3,1463.2 A122.4,122.4 0 0,1 60.4,1391.2" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="233.3" cy="1463.2" r="34" stroke="none"/>
+    <path d="M436.3,1549.5 A138.7,138.7 0 0,1 402.8,1383.9" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="436.3" cy="1549.5" r="34" stroke="none"/>
+    <path d="M813.4,1392.4 A113.9,113.9 0 0,0 867.2,1548.4" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="813.4" cy="1392.4" r="34" stroke="none"/>
+    <path d="M1210.3,1487.7 A112.8,112.8 0 0,1 1082.3,1392.7" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1210.3" cy="1487.7" r="34" stroke="none"/>
+    <path d="M240.3,1710.2 A147.2,147.2 0 0,0 69,1828.9" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="240.3" cy="1710.2" r="34" stroke="none"/>
+    <path d="M421.9,1745.7 A144.4,144.4 0 0,0 584.1,1854.6" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="421.9" cy="1745.7" r="34" stroke="none"/>
+    <path d="M816,1828.4 A109.0,109.0 0 0,1 704.8,1731.3" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="816" cy="1828.4" r="34" stroke="none"/>
+    <path d="M1175.7,1834.3 A140.8,140.8 0 0,1 1022.4,1703" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1175.7" cy="1834.3" r="34" stroke="none"/>
+    <path d="M211.9,1973.4 A132.1,132.1 0 0,1 136.8,2165.1" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="211.9" cy="1973.4" r="34" stroke="none"/>
+    <path d="M373.8,2145.5 A141.2,141.2 0 0,0 559.4,2106.8" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="373.8" cy="2145.5" r="34" stroke="none"/>
+    <path d="M856.2,2184.7 A117.8,117.8 0 0,1 760.2,2042.8" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="856.2" cy="2184.7" r="34" stroke="none"/>
+    <path d="M1190.8,2096.5 A122.5,122.5 0 0,0 1082.9,1988.2" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1190.8" cy="2096.5" r="34" stroke="none"/>
+    <path d="M142.6,2323.7 A130.4,130.4 0 0,1 257.7,2472.9" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="142.6" cy="2323.7" r="34" stroke="none"/>
+    <path d="M508.5,2303.7 A121.7,121.7 0 0,1 552.6,2481.5" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="508.5" cy="2303.7" r="34" stroke="none"/>
+    <path d="M793.8,2459.1 A104.9,104.9 0 0,0 878.3,2359.7" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="793.8" cy="2459.1" r="34" stroke="none"/>
+    <path d="M1056.2,2453.5 A100.6,100.6 0 0,1 1098.9,2306" fill="none" stroke-width="30" stroke-linecap="round" marker-end="url(#head)"/>
+    <circle cx="1056.2" cy="2453.5" r="34" stroke="none"/>
+  </g>
+</svg>

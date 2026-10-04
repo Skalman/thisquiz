@@ -6,10 +6,10 @@ import { t } from "../src/i18n/index.ts";
  * and safely in the past so `isValidDate` accepts it without a debug flag.
  */
 export const DAY_ONE = "2026-04-19";
-export const DAY_ONE_L1 = `/${DAY_ONE}/1`;
+export const DAY_ONE_L1 = `/daily/${DAY_ONE}/1`;
 
 /**
- * The level-1 board is 3 questions × 3 options and its one solution is all-A.
+ * The level-1 puzzle is 3 questions of 3 options and its one solution is all-A.
  * From `cargo run -- check public/puzzles/daily/2026.json 0419-1 --json`
  * (`brute_solutions`). Re-derive it there if that corpus entry ever changes.
  */

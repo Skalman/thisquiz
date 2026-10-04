@@ -5,6 +5,11 @@ function plural(n: number, one: string, other: string): string {
   return n === 1 ? `${n} ${one}` : `${n} ${other}`;
 }
 
+/** An Adventure puzzle's size, spelled out. */
+function sizeName(questions: number, options: number): string {
+  return `${plural(questions, "question", "questions")}, ${plural(options, "option", "options")}`;
+}
+
 /** The icon a How-to-play step is illustrated with. */
 export type HelpIcon = "incorrect" | "correct" | "checkpoint";
 
@@ -29,15 +34,14 @@ export default {
   puzzleList: {
     subtitle: "Self-referential logic puzzles",
     questions: "questions",
-    solvedCount: (solved: number, total: number) => `${solved}/${total}`,
   },
   difficulty: {
-    1: "Intro",
-    2: "Easy",
-    3: "Medium",
-    4: "Hard",
-    5: "Harder",
-    6: "Expert",
+    1: "Relaxed",
+    2: "Curious",
+    3: "Thoughtful",
+    4: "Focused",
+    5: "Immersed",
+    6: "Deep",
   } as Record<number, string>,
   puzzle: {
     undo: "Undo",
@@ -150,6 +154,10 @@ export default {
       "keep-longer": "You're further ahead — no change",
       identical: "Identical — no change",
     } as Record<string, string>,
+    // What else the file brings, besides puzzles.
+    newStars: (n: number) => `${plural(n, "new star", "new stars")} — will be added`,
+    streak: (days: number) => `A streak of ${plural(days, "day", "days")} — will update yours`,
+    adventureReached: (step: number) => `Reached step ${step} in the Adventure — will update yours`,
   },
   aria: {
     close: "Close",
@@ -157,18 +165,29 @@ export default {
     more: "More",
     logo: "Refpuzzle logo",
   },
-  header: {
-    theme: "Theme",
-    themeOptions: "Theme options",
-    // Names where the press lands; the button's icon shows the mode it is in.
-    themeToggle: {
-      auto: "Use system theme",
-      light: "Switch to light theme",
-      dark: "Switch to dark theme",
-    },
-    themeModes: { auto: "Auto", light: "Light", dark: "Dark" },
-    // The play design's switch, beside the theme choice.
+  // The front page: a window onto each section, then the app's own things.
+  overview: {
+    daily: "Daily puzzles",
+    // Under the daily window's title: why to come, past the Adventure.
+    dailyPitch: "Bigger puzzles. More thinking.",
+    levelsSolved: (solved: number, levels: number) => `${solved} of ${levels} solved today`,
+    // The streak: days in a row with a puzzle solved.
+    streak: (days: number) => `${plural(days, "day", "days")} in a row`,
+    streakKeep: "Solve a puzzle today to keep it going.",
     play: "Play",
+    // The label of the list under the windows.
+    more: "More",
+    debug: "Debug",
+    // The way back to the overview, from a page without the header.
+    home: "Home",
+  },
+  settings: {
+    title: "Settings",
+    theme: "Theme",
+    themeModes: { auto: "Auto", light: "Light", dark: "Dark" },
+  },
+  about: {
+    title: "About",
   },
   share: {
     share: "Share",
@@ -191,7 +210,6 @@ export default {
     shareApp: "Share app",
     iosSafari: 'Tap the Share button, then "Add to Home Screen"',
     androidFirefox: 'Tap the menu button (⋮), then "Add app to Home screen"',
-    qrPrompt: "Scan to open on another device",
   },
   help: {
     title: "How to play",
@@ -221,31 +239,28 @@ export default {
     codePlaceholder: "123456",
     scanQr: "Scan QR code",
     expired: "Code expired or not found",
-    tooBusy: "Too busy, try again later",
     error: "Sync failed",
   },
   privacy: {
-    link: "Privacy",
     title: "Privacy",
     paragraphs: [
       "Your progress and settings are stored in your browser and stay on your device.",
       "When you solve a puzzle, anonymous stats (puzzle, time, hints used, browser type) are sent to this site. There are no cookies, no user identifiers, and no third-party trackers.",
       "The web server keeps standard access logs, including IP addresses, for about 30 days.",
     ],
-    // Followed by the contact address, derived from the site's hostname.
-    contactPrompt: "Questions:",
   },
   contact: {
-    link: "Made with ♥ by Dan",
     title: "Hello!",
     // Followed by the contact address.
     body: "Found a bug or have other feedback? Feel free to say hello!",
+    // The About dialog's last line.
+    signature: "Made with ♥ by Dan",
   },
   // The guided tutorial's hand-written copy; board text comes from Rust.
   tutorial: {
     title: "Tutorial",
     skip: "Skip tutorial",
-    // Under the Intro puzzle's controls.
+    // Under the first level's controls.
     takeIt: "Take the tutorial",
     // The lone cell's line before each press, then once it's back to blank.
     cellSteps: (p: PointerKind) => [
@@ -275,11 +290,70 @@ export default {
       three: { text: "Three down!" },
       done: {
         lead: "That's the whole game: choose answers that make every question true.",
-        text: "Daily puzzles are bigger, and the Hint button is there when you're stuck.",
+        text: "Now pick how to play: the Adventure's path of small puzzles, or the daily puzzles.",
       },
     } satisfies Record<TutorialSolvedKey, StepCopy>,
     next: "Next",
-    play: "Play today's puzzle",
+    // The two ways onward, from the last puzzle or from Skip.
+    playAdventure: "Play the Adventure",
+    playDaily: "Play today's puzzles",
+    // Skip's page, above the two ways onward.
+    choose: {
+      lead: "How do you want to play?",
+      text: "In the Adventure, you encounter quick puzzles. For more thinking, check out the bigger daily puzzles.",
+    },
+  },
+  // The Adventure: a path of steps, each offering one small puzzle per size.
+  adventure: {
+    title: "Adventure",
+    // Each hundred steps of the path, on a map of its own.
+    world: (world: number) => `World ${world}`,
+    // The list of worlds' title, opened from a map's title.
+    worldsTitle: "Worlds",
+    starsLabel: (stars: number) => plural(stars, "star", "stars"),
+    diamondsLabel: (diamonds: number) => plural(diamonds, "diamond", "diamonds"),
+    // A solved puzzle's way back to the map.
+    continue: "Continue",
+    // Beside a solved puzzle's bar: the star it earned, or how to earn it.
+    starEarned: "Star earned",
+    // Solved with hints, with the star from an earlier solve.
+    alreadyStarred: "Already starred",
+    starMissed: "Solved with hints. Play it again without them for the star.",
+    // What to do with a solved puzzle, asked when it is pressed on the map.
+    replay: {
+      // The star's line; without one, the dialog says `starMissed`, as the solved board does.
+      starred: "Solved without hints",
+      showSolution: "Show your solution",
+      cancel: "Cancel",
+    },
+    // A puzzle's name, by its step.
+    puzzleTitle: (step: number) => `Step ${step}`,
+    step: {
+      locked: (step: number) => `Step ${step}, locked`,
+      next: (step: number) => `Step ${step}, up next`,
+      done: (step: number, stars: number) =>
+        stars > 0 ? `Step ${step}, done, ${plural(stars, "star", "stars")}` : `Step ${step}, done`,
+    },
+    // One of a step's puzzles, named by its size.
+    size: {
+      unsolved: sizeName,
+      solved: (questions: number, options: number) => `${sizeName(questions, options)}, solved`,
+      starred: (questions: number, options: number) =>
+        `${sizeName(questions, options)}, solved without hints`,
+    },
+    // At a world's end.
+    diamond: (world: number, earned: boolean) =>
+      earned ? `World ${world}'s diamond, earned` : `World ${world}'s diamond, not yet earned`,
+    // Under the first diamond: on to the next world, or to the daily puzzles.
+    firstDiamond: {
+      title: "Your first diamond!",
+      text: "Continue the Adventure, or try the daily puzzles — bigger, for deeper thinking.",
+      daily: "Play today's puzzles",
+    },
+    loadFailed: "The Adventure couldn't load.",
+    noWorld: "No such world.",
+    notFound: "No such puzzle in the Adventure.",
+    backToMap: "Back to the map",
   },
   notFound: {
     noPuzzle: "No puzzle",
