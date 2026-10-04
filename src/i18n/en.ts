@@ -256,7 +256,8 @@ export default {
       "This app stops working on March 31, 2027. To keep your progress, move it to thisquiz.app:",
     installedSteps: [
       "Open thisquiz.app and add it to your home screen.",
-      'In the new app, open "Sync and backup", then "Sync devices", and tap "Start sync".',
+      'In the new app, tap "Skip tutorial" if the tutorial opens.',
+      'Open "Sync and backup", then "Sync devices", and tap "Start sync".',
       'Back here, tap "Sync devices", enter the code, and tap "Join".',
       "Once your progress shows in the new app, remove this one.",
     ],
