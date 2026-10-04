@@ -9,7 +9,7 @@ import { updateThemeColor } from "../lib/theme.ts";
 const THEME_MODES = ["auto", "light", "dark"] as const;
 type ThemeMode = (typeof THEME_MODES)[number];
 
-const THEME_KEY = "refpuzzle:theme";
+const THEME_KEY = "thisquiz:theme";
 
 function useTheme() {
   const [mode, setMode] = useState<ThemeMode>(() => {

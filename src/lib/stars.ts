@@ -3,7 +3,7 @@
  * board, so clearing a board to play it again keeps its star.
  */
 
-const STARS_KEY = "refpuzzle:stars";
+const STARS_KEY = "thisquiz:stars";
 
 /** The ids of the puzzles with a star. */
 export function loadStars(): Set<string> {

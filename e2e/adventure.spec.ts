@@ -21,14 +21,14 @@ async function solvedElsewhere(page: Page) {
   await page.addInitScript((state) => {
     if (sessionStorage.getItem("seeded") !== null) return;
     sessionStorage.setItem("seeded", "1");
-    localStorage.setItem("refpuzzle:puzzle:/adventure/1/2x2", state);
+    localStorage.setItem("thisquiz:puzzle:/adventure/1/2x2", state);
   }, STEP_ONE_SOLVED);
 }
 
 /** A path whose reached step is `step`. */
 async function seedReached(page: Page, step: number) {
   await page.addInitScript(
-    (value) => localStorage.setItem("refpuzzle:adventure-reached", value),
+    (value) => localStorage.setItem("thisquiz:adventure-reached", value),
     String(step),
   );
 }
@@ -234,9 +234,7 @@ test("a solved size asks, from the expanded step, to replay it or show the solut
   page,
 }) => {
   await seedReached(page, 31);
-  await page.addInitScript(() =>
-    localStorage.setItem("refpuzzle:puzzle:/adventure/30/2x3", "v1|s"),
-  );
+  await page.addInitScript(() => localStorage.setItem("thisquiz:puzzle:/adventure/30/2x3", "v1|s"));
   for (const choice of ["replay-show-solution", "replay-play-again"]) {
     await page.goto("/adventure");
     await stepCircle(page, 30).click();
@@ -348,7 +346,7 @@ async function seedStreak(page: Page, daysAgo: number, length: number) {
       date.setDate(date.getDate() - days);
       const pad = (n: number) => String(n).padStart(2, "0");
       const last = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-      localStorage.setItem("refpuzzle:streak", JSON.stringify({ last, length: run }));
+      localStorage.setItem("thisquiz:streak", JSON.stringify({ last, length: run }));
     },
     [daysAgo, length],
   );

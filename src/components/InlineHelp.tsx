@@ -16,7 +16,7 @@ export function InlineHelp({ highlight }: { highlight?: boolean }) {
   const s = t();
   const [firstVisit, setFirstVisit] = useState(() => {
     try {
-      return !localStorage.getItem("refpuzzle:onboarded");
+      return !localStorage.getItem("thisquiz:onboarded");
     } catch {
       return false;
     }
@@ -25,7 +25,7 @@ export function InlineHelp({ highlight }: { highlight?: boolean }) {
   useEffect(() => {
     if (!firstVisit) return undefined;
     try {
-      localStorage.setItem("refpuzzle:onboarded", "1");
+      localStorage.setItem("thisquiz:onboarded", "1");
     } catch {
       // ignore
     }

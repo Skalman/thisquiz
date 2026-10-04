@@ -105,7 +105,7 @@ export function currentStep(steps: TutorialStep[], marks: Marks[]): TutorialStep
   return steps[next] ?? null;
 }
 
-const DONE_KEY = "refpuzzle:tutorial";
+const DONE_KEY = "thisquiz:tutorial";
 
 /** Also held in memory, so a failed save still retires it this visit. */
 let doneThisVisit = false;

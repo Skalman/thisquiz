@@ -130,7 +130,7 @@ export function adventurePuzzle(
   return puzzle;
 }
 
-const REACHED_KEY = "refpuzzle:adventure-reached";
+const REACHED_KEY = "thisquiz:adventure-reached";
 
 /** The furthest reached step noted this visit, for when storage can't keep it. */
 let reachedThisVisit = 0;
@@ -256,7 +256,7 @@ export function adventureProgress(): AdventureProgress {
   };
 }
 
-const LAST_PLAYED_KEY = "refpuzzle:adventure-last-played";
+const LAST_PLAYED_KEY = "thisquiz:adventure-last-played";
 
 /**
  * Where the player is on the path: the step they last played, or the one a

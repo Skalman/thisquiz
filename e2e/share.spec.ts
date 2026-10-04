@@ -35,8 +35,8 @@ test("a shared progress URL restores the board on a clean device", async ({ page
   const fresh = await browser.newContext();
   const freshPage = await fresh.newPage();
   await freshPage.addInitScript(() => {
-    localStorage.setItem("refpuzzle:onboarded", "1");
-    localStorage.setItem("refpuzzle:theme", "light");
+    localStorage.setItem("thisquiz:onboarded", "1");
+    localStorage.setItem("thisquiz:theme", "light");
   });
   await freshPage.goto(url);
 
@@ -57,7 +57,7 @@ const SOLVED_WITH_HINT = `${DAY_ONE_L1}#v1.h1q1.1A.2A.3A`;
 /** The same, one mark in and unsolved. */
 const STARTED_WITH_HINT = `${DAY_ONE_L1}#v1.h1q1.1A`;
 
-const ENTRY = "refpuzzle:puzzle:/2026-04-19/1";
+const ENTRY = "thisquiz:puzzle:/2026-04-19/1";
 
 test("a shared solved board is recorded without the sharer's markers", async ({ page }) => {
   await page.goto(SOLVED_WITH_HINT);

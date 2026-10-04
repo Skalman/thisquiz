@@ -56,7 +56,7 @@ async function playPuzzle(page: Page, puzzle: TutorialPuzzle) {
 
 /** Clears the tutorial flag, as on a fresh device. */
 async function freshDevice(page: Page) {
-  await page.addInitScript(() => localStorage.removeItem("refpuzzle:tutorial"));
+  await page.addInitScript(() => localStorage.removeItem("thisquiz:tutorial"));
 }
 
 test("a solve step takes any cell", async ({ page }) => {
@@ -98,7 +98,7 @@ test("a first visit opens the tutorial", async ({ page }) => {
 
 test("a visit with progress stays on the overview", async ({ page }) => {
   await freshDevice(page);
-  await page.addInitScript(() => localStorage.setItem("refpuzzle:puzzle:/2026-04-19/1", "x"));
+  await page.addInitScript(() => localStorage.setItem("thisquiz:puzzle:/2026-04-19/1", "x"));
   await page.goto("/");
   await expect(page.getByTestId("overview-daily")).toBeVisible();
   await expect(page).not.toHaveURL(/\/tutorial$/);
@@ -123,7 +123,7 @@ test("skipping offers the two ways onward, with the tutorial retired", async ({ 
   await page.goto("/tutorial");
   await page.getByTestId("tutorial-skip").click();
   await expect(page.getByTestId("tutorial-skip")).toHaveCount(0);
-  expect(await page.evaluate(() => localStorage.getItem("refpuzzle:tutorial"))).toBe("1");
+  expect(await page.evaluate(() => localStorage.getItem("thisquiz:tutorial"))).toBe("1");
   await page.getByTestId("tutorial-daily").click();
   await expect(page).toHaveURL(/\/daily$/);
   await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
@@ -170,7 +170,7 @@ test("the script walks through to today's puzzle", async ({ page }) => {
   await page.getByTestId("tutorial-daily").click();
   await expect(page).toHaveURL(/\/daily$/);
   await expect(page.getByRole("tab", { name: s.difficulty[1] })).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem("refpuzzle:tutorial"))).toBe("1");
+  expect(await page.evaluate(() => localStorage.getItem("thisquiz:tutorial"))).toBe("1");
 });
 
 test("the script's Adventure destination opens the map", async ({ page }) => {

@@ -25,7 +25,9 @@
     <meta property="og:image:height" content="1080" />
     <meta name="twitter:card" content="summary_large_image" />
     <script>
-      var t = localStorage.getItem("refpuzzle:theme");
+      // Remove support for refpuzzle.com after 2027-06-01.
+      // The old key covers the first boot, before the bundle moves it.
+      var t = localStorage.getItem("thisquiz:theme") || localStorage.getItem("refpuzzle:theme");
       if (t) document.documentElement.setAttribute("data-theme", t);
       var dark = t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);
       document.querySelector('meta[name="theme-color"]').content = dark ? "#0f1117" : "#faf9f7";

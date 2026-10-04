@@ -9,7 +9,7 @@ export interface Streak {
   length: number;
 }
 
-const STREAK_KEY = "refpuzzle:streak";
+const STREAK_KEY = "thisquiz:streak";
 
 /** A `YYYY-MM-DD` date as a count of days, for differences. */
 function dayIndex(date: string): number {

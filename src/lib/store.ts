@@ -40,8 +40,8 @@ export interface SavedState {
 export const PUZZLE_VERSION = 3;
 /** Version of the saved-state string format; gates the boot sweep. */
 const FORMAT_VERSION = 1;
-const VERSION_KEY = "refpuzzle:version";
-const PREFIX = "refpuzzle:puzzle:";
+const VERSION_KEY = "thisquiz:version";
+const PREFIX = "thisquiz:puzzle:";
 const LETTERS = ["A", "B", "C", "D", "E"];
 const META_SEP = "|";
 

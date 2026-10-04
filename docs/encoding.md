@@ -194,7 +194,7 @@ corrupt input.)
   sweep, those helpers are v1-only.
 - The sweep is gated on a stored format version, kept beside the puzzle
   revalidation version in one querystring-shaped key:
-  `refpuzzle:version = "puzzle=3&format=1"` (a legacy bare number means
+  `thisquiz:version = "puzzle=3&format=1"` (a legacy bare number means
   `format=0`). The fields have different writers in different phases, so
   all access goes through one read-merge-write accessor. The conversion
   stays idempotent: if `loadState` ever sniffs a v0 string in localStorage

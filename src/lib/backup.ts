@@ -3,7 +3,7 @@ import { addStars, loadStars } from "./stars.ts";
 import { migrateValue, isSolvedValue } from "./store.ts";
 import { loadStreak, mergedStreak, saveStreak, type Streak } from "./streak.ts";
 
-const PREFIX = "refpuzzle:puzzle:";
+const PREFIX = "thisquiz:puzzle:";
 const BACKUP_VERSION = 1;
 
 interface BackupData {

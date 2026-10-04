@@ -2,7 +2,7 @@ import { test, expect, s, cell, markCorrect, solveDayOneL1, DAY_ONE_L1 } from ".
 
 /** The stored entry for day-one level 1, ledger included. */
 function storedEntry(page: import("@playwright/test").Page) {
-  return page.evaluate(() => localStorage.getItem("refpuzzle:puzzle:/2026-04-19/1"));
+  return page.evaluate(() => localStorage.getItem("thisquiz:puzzle:/2026-04-19/1"));
 }
 
 /**

@@ -2,6 +2,8 @@ import { render } from "preact";
 import "./index.css"; // oxlint-disable-line import/no-unassigned-import
 import { App } from "./App.tsx";
 import { setupErrorTracking, trackFatalError } from "./lib/analytics.ts";
+// Remove support for refpuzzle.com after 2027-06-01.
+import { moveLegacyKeys } from "./lib/handoff.ts";
 import { migrateLocalStorage } from "./lib/store.ts";
 import { revalidateIfNeeded } from "./lib/revalidate.ts";
 import { wasmReady } from "./lib/wasm.ts";
@@ -17,6 +19,8 @@ declare global {
 // The bundle ran, so cancel the inline boot watchdog.
 window.cancelBootTimeout?.();
 
+// Remove support for refpuzzle.com after 2027-06-01.
+moveLegacyKeys();
 migrateLocalStorage();
 revalidateIfNeeded();
 
