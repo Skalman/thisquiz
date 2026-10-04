@@ -3,7 +3,7 @@ import "./index.css"; // oxlint-disable-line import/no-unassigned-import
 import { App } from "./App.tsx";
 import { setupErrorTracking, trackFatalError } from "./lib/analytics.ts";
 // Remove support for refpuzzle.com after 2027-06-01.
-import { moveLegacyKeys } from "./lib/handoff.ts";
+import { leaveLegacyHost, moveLegacyKeys } from "./lib/handoff.ts";
 import { migrateLocalStorage } from "./lib/store.ts";
 import { revalidateIfNeeded } from "./lib/revalidate.ts";
 import { wasmReady } from "./lib/wasm.ts";
@@ -21,21 +21,25 @@ window.cancelBootTimeout?.();
 
 // Remove support for refpuzzle.com after 2027-06-01.
 moveLegacyKeys();
-migrateLocalStorage();
-revalidateIfNeeded();
+if (!leaveLegacyHost()) start();
 
-// The board renders question/option text through wasm (single source of truth
-// with the hint engine), so the module must be initialized before the first
-// paint. Kick the fetch immediately; the binary is small and the service worker
-// caches it, so this only costs anything on the very first visit.
-void wasmReady().then(
-  () => render(<App />, document.getElementById("app")!),
-  (e: unknown) => {
-    console.error("wasm init failed", e);
-    window.showFatalError?.(e);
-    if (import.meta.env.PROD) trackFatalError(e, "wasm_init_failed");
-  },
-);
+function start() {
+  migrateLocalStorage();
+  revalidateIfNeeded();
+
+  // The board renders question/option text through wasm (single source of truth
+  // with the hint engine), so the module must be initialized before the first
+  // paint. Kick the fetch immediately; the binary is small and the service worker
+  // caches it, so this only costs anything on the very first visit.
+  void wasmReady().then(
+    () => render(<App />, document.getElementById("app")!),
+    (e: unknown) => {
+      console.error("wasm init failed", e);
+      window.showFatalError?.(e);
+      if (import.meta.env.PROD) trackFatalError(e, "wasm_init_failed");
+    },
+  );
+}
 
 if (import.meta.env.PROD) {
   setupErrorTracking();

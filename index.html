@@ -36,6 +36,11 @@
       canonical.rel = "canonical";
       canonical.href = "https://thisquiz.app" + location.pathname;
       document.head.appendChild(canonical);
+      // Remove support for refpuzzle.com after 2027-06-01. With manifest-refpuzzle.json.
+      // The old host keeps its installed app's name.
+      if (location.hostname === "refpuzzle.com") {
+        document.querySelector('link[rel="manifest"]').href = "/manifest-refpuzzle.json";
+      }
     </script>
     <!-- Fallback shown when the app never mounts (see main.tsx). Self-contained,
          so it works without the bundle. -->

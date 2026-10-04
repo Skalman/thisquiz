@@ -4,7 +4,7 @@ import { LocationProvider, Router, Route, useLocation } from "preact-iso";
 import { tinykeys } from "tinykeys";
 import { PuzzleView } from "./components/PuzzleView.tsx";
 import { KeyboardHelp } from "./components/KeyboardHelp.tsx";
-import { planImport, applyImport } from "./lib/backup.ts";
+import { planImport, applyImport, planChanges } from "./lib/backup.ts";
 import type { ImportPlan } from "./lib/backup.ts";
 import { joinSync } from "./lib/sync.ts";
 // QR components lazy-loaded via dynamic import (no preact dependency in chunks)
@@ -44,6 +44,8 @@ import { ImportPreview } from "./components/ImportPreview.tsx";
 import { DailyHeader } from "./components/DailyHeader.tsx";
 import { ArchivePage } from "./components/ArchivePage.tsx";
 import { ErrorOverlay } from "./components/ErrorOverlay.tsx";
+// Remove support for refpuzzle.com after 2027-06-01.
+import { MoveBanner } from "./components/MoveBanner.tsx";
 import { SafeAreaSimulator } from "./components/SafeAreaSimulator.tsx";
 import { InlineHelp } from "./components/InlineHelp.tsx";
 import { DifficultyTabs } from "./components/DifficultyTabs.tsx";
@@ -60,6 +62,9 @@ import { OverviewPage } from "./components/OverviewPage.tsx";
 import { ADVENTURE_PATH } from "./puzzles/adventure.ts";
 import { useThemeColorWatch } from "./lib/theme.ts";
 import { inSection } from "./lib/design.ts";
+// Remove support for refpuzzle.com after 2027-06-01.
+import { IMPORT_PATH } from "./lib/domain-move.ts";
+import { fillSettings, readHandoff, type Handoff } from "./lib/handoff.ts";
 
 adoptDebugParam();
 
@@ -373,6 +378,60 @@ function SyncRoute() {
   );
 }
 
+// Remove support for refpuzzle.com after 2027-06-01.
+/** Storage handed over from the old site, merged the way a sync is. */
+function ImportRoute() {
+  const s = t();
+  const [packed] = useState(() => window.location.hash.slice(1));
+  const [status, setStatus] = useState<"reading" | "ready" | "error">("reading");
+  const [handoff, setHandoff] = useState<Handoff | null>(null);
+
+  useEffect(() => {
+    // The payload leaves the address bar, so a copied or reloaded URL doesn't carry it.
+    history.replaceState(null, "", IMPORT_PATH);
+    if (!packed) {
+      setStatus("error");
+      return;
+    }
+    readHandoff(packed)
+      .then((read) => {
+        // Settings alone, or progress already here, need no say-so.
+        if (!planChanges(read.plan)) {
+          fillSettings(read.settings);
+          window.location.replace(read.path);
+          return;
+        }
+        setHandoff(read);
+        setStatus("ready");
+      })
+      .catch(() => setStatus("error"));
+  }, [packed]);
+
+  function finish(read: Handoff, imported: boolean) {
+    if (imported) applyImport(read.plan);
+    fillSettings(read.settings);
+    setHandoff(null);
+    window.location.replace(read.path);
+  }
+
+  return (
+    <NoticePage
+      title={status === "error" ? s.move.importFailedTitle : undefined}
+      message={status === "error" ? s.move.importFailed : undefined}
+    >
+      {status === "reading" && <Loading />}
+      {status === "error" && <Link href="/">{s.notFound.backToPuzzles}</Link>}
+      {handoff && (
+        <ImportPreview
+          plan={handoff.plan}
+          onConfirm={() => finish(handoff, true)}
+          onCancel={() => finish(handoff, false)}
+        />
+      )}
+    </NoticePage>
+  );
+}
+
 function PlaygroundRoute() {
   const hash = window.location.hash.slice(1);
   type State =
@@ -452,6 +511,8 @@ export function App() {
       {/* Remade whole when Debug switches change, the address kept. */}
       <AppFrame key={debugRevision}>
         <ErrorOverlay />
+        {/* Remove support for refpuzzle.com after 2027-06-01. */}
+        <MoveBanner />
         <Router>
           <Route path="/" component={HomeRoute} />
           <Route path="/tutorial" component={TutorialRoute} />
@@ -462,6 +523,8 @@ export function App() {
           <Route path={ARCHIVE_PATH} component={ArchivePage} />
           <Route path={`${DAILY_PATH}/:date/:level`} component={DayRoute} />
           <Route path="/sync" component={SyncRoute} />
+          {/* Remove support for refpuzzle.com after 2027-06-01. */}
+          <Route path={IMPORT_PATH} component={ImportRoute} />
           <Route path="/playground" component={PlaygroundRoute} />
           <Route default component={NotFound} />
         </Router>

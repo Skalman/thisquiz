@@ -3,6 +3,7 @@ import type { Marks } from "../engine/types.ts";
 import { FRESH_MARKS } from "../engine/types.ts";
 import type { QuestionState, SavedState } from "./store.ts";
 import { cloneStates, encodeHistory } from "./store.ts";
+import { packText, unpackText } from "./compress.ts";
 
 // Build a SavedState whose history is the sequence of single-mark changes
 // that leads to `marks`. encodeHistory's diffAction only emits one mark per
@@ -31,38 +32,11 @@ export function savedStateFromMarks(marks: Marks[]): SavedState {
 
 // Hash format: p=<url-safe-base64(deflate(json))>[&h=<encoded-play-state>]
 
-async function deflate(str: string): Promise<Uint8Array> {
-  const compressed = new Blob([str]).stream().pipeThrough(new CompressionStream("deflate-raw"));
-  return new Uint8Array(await new Response(compressed).arrayBuffer());
-}
-
-async function inflate(bytes: Uint8Array): Promise<string> {
-  const ds = new DecompressionStream("deflate-raw");
-  const decompressed = new Blob([new Uint8Array(bytes)]).stream().pipeThrough(ds);
-  return new TextDecoder().decode(await new Response(decompressed).arrayBuffer());
-}
-
-function toBase64Url(bytes: Uint8Array): string {
-  let binary = "";
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
-function fromBase64Url(str: string): Uint8Array {
-  const padLength = (4 - (str.length % 4)) % 4;
-  const padded = str
-    .replace(/-/g, "+")
-    .replace(/_/g, "/")
-    .padEnd(str.length + padLength, "=");
-  const binary = atob(padded);
-  return Uint8Array.from({ length: binary.length }, (_, i) => binary.charCodeAt(i));
-}
-
 export async function encodePlaygroundHash(
   compact: CompactPuzzle,
   state?: SavedState,
 ): Promise<string> {
-  const p = toBase64Url(await deflate(JSON.stringify(compact)));
+  const p = await packText(JSON.stringify(compact));
   const h = state ? encodeHistory(state) : null;
   return h ? `p=${p}&h=${h}` : `p=${p}`;
 }
@@ -75,7 +49,7 @@ export async function decodePlaygroundHash(
   const stateHash = params.get("h");
   if (!puzzlePart) return null;
   try {
-    const json = await inflate(fromBase64Url(puzzlePart));
+    const json = await unpackText(puzzlePart);
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     const compact = JSON.parse(json) as CompactPuzzle;
     if (!compact?.q || !Array.isArray(compact.q)) return null;

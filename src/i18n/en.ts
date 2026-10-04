@@ -241,6 +241,29 @@ export default {
     expired: "Code expired or not found",
     error: "Sync failed",
   },
+  // Remove support for refpuzzle.com after 2027-06-01.
+  // Shown on refpuzzle.com, which closes after the move to thisquiz.app.
+  move: {
+    title: "Refpuzzle is now This Quiz",
+    urgentTitle: "refpuzzle.com closes March 31",
+    browserBody:
+      "Same puzzles, new name and address: thisquiz.app. Move now, and your progress comes along.",
+    urgentBrowserBody:
+      "This address closes on March 31, 2027. Move to thisquiz.app now, and your progress comes along.",
+    moveButton: "Move to thisquiz.app",
+    installedBody: "Same puzzles, new name and address: thisquiz.app. To keep your progress:",
+    urgentInstalledBody:
+      "This app stops working on March 31, 2027. To keep your progress, move it to thisquiz.app:",
+    installedSteps: [
+      "Open thisquiz.app and add it to your home screen.",
+      'In the new app, open "Sync and backup", then "Sync devices", and tap "Start sync".',
+      'Back here, tap "Sync devices", enter the code, and tap "Join".',
+      "Once your progress shows in the new app, remove this one.",
+    ],
+    openNewSite: "Open thisquiz.app",
+    importFailedTitle: "Nothing to import",
+    importFailed: "This link holds no progress, or it was cut short.",
+  },
   privacy: {
     title: "Privacy",
     paragraphs: [

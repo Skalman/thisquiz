@@ -1,4 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
+// Remove support for refpuzzle.com after 2027-06-01.
+import type { MovePhase } from "./domain-move.ts";
 
 /**
  * Development switches, kept in sessionStorage so they survive a reload but
@@ -59,6 +61,20 @@ export function reachedStepOverride(): number | null {
 
 export function setReachedStepOverride(step: number | null): void {
   write(REACHED_STEP_KEY, step === null ? null : String(step));
+}
+
+// Remove support for refpuzzle.com after 2027-06-01.
+const LEGACY_HOST_KEY = "debug:legacy-host";
+const MOVE_PHASES: readonly MovePhase[] = ["move", "urgent", "closed"];
+
+/** The page as refpuzzle.com shows it in this phase; null is this host as it is. */
+export function legacyHostPreview(): MovePhase | null {
+  const phase = read(LEGACY_HOST_KEY);
+  return MOVE_PHASES.find((x) => x === phase) ?? null;
+}
+
+export function setLegacyHostPreview(phase: MovePhase | null): void {
+  write(LEGACY_HOST_KEY, phase);
 }
 
 const changeListeners = new Set<() => void>();

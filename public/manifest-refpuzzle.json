@@ -1,0 +1,48 @@
+{
+  "id": "/",
+  "name": "Refpuzzle (old)",
+  "short_name": "Refpuzzle (old)",
+  "description": "Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0f1117",
+  "background_color": "#0f1117",
+  "icons": [
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}
