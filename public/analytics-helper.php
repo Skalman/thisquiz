@@ -5,6 +5,9 @@ $GLOBALS['_app_config'] ??= file_exists($f = __DIR__ . '/config.php') ? require 
 function analytics_log(string $event, array $props = []): void {
     $db_path = $GLOBALS['_app_config']['db'] ?? '/tmp/logiquiz-analytics.sqlite3';
 
+    // Remove support for refpuzzle.com after 2027-06-01.
+    if (($_SERVER['HTTP_HOST'] ?? '') === 'refpuzzle.com') $props['legacyHost'] = true;
+
     $db = new SQLite3($db_path);
     $db->exec("CREATE TABLE IF NOT EXISTS events (
         id    INTEGER PRIMARY KEY AUTOINCREMENT,
