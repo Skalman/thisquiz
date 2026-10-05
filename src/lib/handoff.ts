@@ -87,12 +87,24 @@ export function hasProgressToMove(): boolean {
   return holdsProgress(sortStoredKeys(readEntries(PREFIX)).backup);
 }
 
+/** Marks a payload sent uncompressed; packed text never starts with it. */
+const PLAIN_MARK = "~";
+
+/** The payload for the hash: packed, or plain where the browser can't compress. */
+async function encodePayload(json: string): Promise<string> {
+  try {
+    return await packText(json);
+  } catch {
+    return PLAIN_MARK + encodeURIComponent(json);
+  }
+}
+
 /** This page on the new site, carrying this device's storage when it has any. */
 export async function handoffUrl(): Promise<string> {
   const path = window.location.pathname + window.location.search + window.location.hash;
   const keys = readEntries(PREFIX);
   if (Object.keys(keys).length === 0) return newOrigin() + path;
-  return `${newOrigin()}${IMPORT_PATH}#${await packText(JSON.stringify({ path, keys }))}`;
+  return `${newOrigin()}${IMPORT_PATH}#${await encodePayload(JSON.stringify({ path, keys }))}`;
 }
 
 /**
@@ -121,7 +133,10 @@ export interface Handoff {
 
 /** The storage a handoff link's hash carries; rejects on anything else. */
 export async function readHandoff(packed: string): Promise<Handoff> {
-  const data: unknown = JSON.parse(await unpackText(packed));
+  const json = packed.startsWith(PLAIN_MARK)
+    ? decodeURIComponent(packed.slice(PLAIN_MARK.length))
+    : await unpackText(packed);
+  const data: unknown = JSON.parse(json);
   if (typeof data !== "object" || data === null || !("keys" in data)) {
     throw new Error("Invalid handoff");
   }
@@ -135,6 +150,6 @@ export async function readHandoff(packed: string): Promise<Handoff> {
   return {
     plan: planImport(JSON.stringify(backup)),
     settings,
-    path: landingPath("path" in data ? data.path : undefined),
+    path: landingPath("path" in data ? data.path : undefined, window.location.origin),
   };
 }

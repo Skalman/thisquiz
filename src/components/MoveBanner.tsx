@@ -1,6 +1,7 @@
 // Remove support for refpuzzle.com after 2027-06-01.
 import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
+import { useLocation } from "preact-iso";
 import { t } from "../i18n/index.ts";
 import { getClientInfo, track } from "../lib/analytics.ts";
 import { NEW_ORIGIN } from "../lib/domain-move.ts";
@@ -67,11 +68,12 @@ function BrowserMove({ urgent }: { urgent: boolean }) {
 function InstalledMove({ urgent }: { urgent: boolean }) {
   const s = t();
   const backup = useBackupFlow();
-  // Ready before the press, so opening the new site stays a direct response to it.
+  // Ready before the press, so opening the new site stays a direct response to
+  // it; rebuilt per page and as a press starts, to carry the latest progress.
+  const { url } = useLocation();
   const [newSite, setNewSite] = useState(`${NEW_ORIGIN}/`);
-  useEffect(() => {
-    void handoffUrl().then(setNewSite);
-  }, []);
+  const refresh = () => void handoffUrl().then(setNewSite);
+  useEffect(refresh, [url]);
 
   return (
     <Frame urgent={urgent} body={urgent ? s.move.urgentInstalledBody : s.move.installedBody}>
@@ -81,7 +83,13 @@ function InstalledMove({ urgent }: { urgent: boolean }) {
         ))}
       </ol>
       <div class="flex flex-wrap gap-2">
-        <ButtonLink variant="primary" size="lg" href={newSite} target="_blank">
+        <ButtonLink
+          variant="primary"
+          size="lg"
+          href={newSite}
+          target="_blank"
+          onPointerDown={refresh}
+        >
           {s.move.openNewSite}
         </ButtonLink>
         <Button

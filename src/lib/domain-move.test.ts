@@ -61,11 +61,14 @@ test("settings alone are no progress", () => {
 });
 
 test("the landing path stays on this site", () => {
-  assert.equal(landingPath("/daily/2026-10-01/3?x#y"), "/daily/2026-10-01/3?x#y");
-  assert.equal(landingPath("//evil.example/"), "/");
-  assert.equal(landingPath("/\\evil.example/"), "/");
-  assert.equal(landingPath("https://evil.example/"), "/");
-  assert.equal(landingPath(undefined), "/");
+  const origin = "https://thisquiz.app";
+  assert.equal(landingPath("/daily/2026-10-01/3?x#y", origin), "/daily/2026-10-01/3?x#y");
+  assert.equal(landingPath("//evil.example/", origin), "/");
+  assert.equal(landingPath("/\\evil.example/", origin), "/");
+  assert.equal(landingPath("/\t/evil.example/", origin), "/");
+  assert.equal(landingPath("/\n/evil.example/", origin), "/");
+  assert.equal(landingPath("https://evil.example/", origin), "/");
+  assert.equal(landingPath(undefined, origin), "/");
 });
 
 test("refpuzzle.com has closed: remove the domain move (see domain-move.ts)", () => {

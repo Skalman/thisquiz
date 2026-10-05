@@ -72,7 +72,14 @@ export function holdsProgress(backup: StoredBackup): boolean {
   );
 }
 
-/** A path on this site to land on; anything else is the front page. */
-export function landingPath(path: unknown): string {
-  return typeof path === "string" && /^\/(?![/\\])/.test(path) ? path : "/";
+/** A path on `origin` to land on; anything else is the front page. */
+export function landingPath(path: unknown, origin: string): string {
+  if (typeof path !== "string" || !path.startsWith("/")) return "/";
+  try {
+    // Parsed, since the parser drops tabs and newlines a pattern would miss.
+    const url = new URL(path, origin);
+    return url.origin === origin ? url.pathname + url.search + url.hash : "/";
+  } catch {
+    return "/";
+  }
 }
