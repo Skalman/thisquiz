@@ -359,12 +359,14 @@ test("a solve starts the streak; one the day after runs it on", async ({ page })
   await solveStepOne(page);
   await page.goto("/");
   await expect(page.getByTestId("streak")).toHaveText(s.overview.streak(1));
+  await expect(page.getByTestId("streak")).toHaveAttribute("data-lit", "true");
 
-  // Last solved yesterday: still running, and asking for today's.
+  // Last solved yesterday: still running, its flame unlit until today's.
   await seedStreak(page, 1, 4);
   await page.reload();
   await expect(page.getByTestId("streak")).toContainText(s.overview.streak(4));
-  await expect(page.getByTestId("streak")).toContainText(s.overview.streakKeep);
+  await expect(page.getByTestId("streak")).toContainText(s.overview.streakOpen);
+  await expect(page.getByTestId("streak")).toHaveAttribute("data-lit", "false");
 
   // A replay counts.
   await page.goto(STEP_ONE);

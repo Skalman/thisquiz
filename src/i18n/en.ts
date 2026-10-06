@@ -156,7 +156,7 @@ export default {
     } as Record<string, string>,
     // What else the file brings, besides puzzles.
     newStars: (n: number) => `${plural(n, "new star", "new stars")} — will be added`,
-    streak: (days: number) => `A streak of ${plural(days, "day", "days")} — will update yours`,
+    streak: (days: number) => `${days}-day streak — will update yours`,
     adventureReached: (step: number) => `Reached step ${step} in the Adventure — will update yours`,
   },
   aria: {
@@ -172,8 +172,9 @@ export default {
     dailyPitch: "Bigger puzzles. More thinking.",
     levelsSolved: (solved: number, levels: number) => `${solved} of ${levels} solved today`,
     // The streak: days in a row with a puzzle solved.
-    streak: (days: number) => `${plural(days, "day", "days")} in a row`,
-    streakKeep: "Solve a puzzle today to keep it going.",
+    streak: (days: number) => `${days}-day streak`,
+    // Read out while today has no solve yet; the unlit flame shows it on screen.
+    streakOpen: "Solve a puzzle today to keep it going.",
     play: "Play",
     // The label of the list under the windows.
     more: "More",

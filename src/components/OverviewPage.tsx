@@ -170,22 +170,23 @@ function AdventureWindow() {
   );
 }
 
-/** The streak, while it runs: the days so far, and a reminder until today has a solve. */
+/** The streak, while it runs: the days so far, its flame unlit until today has a solve. */
 function Streak() {
   const s = t();
   const today = useToday();
   const days = currentStreak(today);
   if (days === 0) return null;
+  const lit = solvedToday(today);
   return (
     <p
-      class="mt-2 flex flex-wrap items-center justify-center gap-x-2 text-body"
+      class="mt-2 flex items-center justify-center gap-1 text-body font-semibold"
       data-testid="streak"
+      data-lit={lit}
     >
-      <span class="inline-flex items-center gap-1 font-semibold">
-        <IconFlame class="text-pending" />
-        {s.overview.streak(days)}
-      </span>
-      {!solvedToday(today) && <span class="text-muted">{s.overview.streakKeep}</span>}
+      <IconFlame strokeWidth={3} class={lit ? "text-pending" : "text-muted"} />
+      {s.overview.streak(days)}
+      {/* The unlit flame's meaning, for those who can't see its color. */}
+      {!lit && <span class="sr-only">. {s.overview.streakOpen}</span>}
     </p>
   );
 }
