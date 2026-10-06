@@ -20,7 +20,8 @@ export function LetterChip({ letter, class: extraClass }: { letter: string; clas
         extraClass,
       )}
     >
-      {letter}
+      {/* Trimmed to the capital's height, so centering centers the letter itself. */}
+      <span class="[text-box:trim-both_cap_alphabetic]">{letter}</span>
     </span>
   );
 }
