@@ -11,6 +11,10 @@ export default defineConfig({
     "react/react-in-jsx-scope": "off",
     "react-perf/jsx-no-new-function-as-prop": "off",
     "typescript/no-floating-promises": "off",
+    // The React Compiler's rules: they guard its automatic memoization, which
+    // Preact doesn't do, and reading refs during render is deliberate here.
+    "react/refs": "off",
+    "react/immutability": "off",
     // "eslint/max-lines": ["error", { max: 1000 }],
   },
   overrides: [
