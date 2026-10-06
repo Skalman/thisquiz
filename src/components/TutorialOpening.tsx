@@ -2,8 +2,7 @@ import { useState } from "preact/hooks";
 import type { OptionMark } from "../engine/types.ts";
 import { OptionButton } from "./OptionButton.tsx";
 import { TutorialNext, TutorialPanel } from "./TutorialPanel.tsx";
-import { Logo } from "./Logo.tsx";
-import { Brand } from "./Brand.tsx";
+import { BrandTitle } from "./BrandTitle.tsx";
 import { classNames } from "../lib/classNames.ts";
 import { usePressGuard } from "./usePressGuard.ts";
 import { pointerKind } from "../lib/pointer.ts";
@@ -27,18 +26,13 @@ export function TutorialOpening({ onNext }: { onNext: () => void }) {
   return (
     <div class="flex flex-col items-center gap-4">
       {/* A welcome, fading at the first press; its space stays, so nothing shifts. */}
-      <h1
+      <BrandTitle
         inert
         class={classNames(
-          "flex items-center gap-3 text-display font-normal tracking-tight motion-safe:transition-[opacity,visibility] motion-safe:duration-500",
+          "motion-safe:transition-[opacity,visibility] motion-safe:duration-500",
           presses > 0 && "invisible opacity-0",
         )}
-      >
-        <Logo />
-        <span>
-          <Brand />
-        </span>
-      </h1>
+      />
       <TutorialPanel
         message={{ text: lines[presses === 0 ? 0 : LINE_AFTER[presses % 3]] }}
         steps={lines.map((text) => ({ text }))}

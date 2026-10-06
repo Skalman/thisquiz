@@ -113,13 +113,8 @@ export function DailyHeader({
     <header class="relative mb-4 flex items-center justify-between">
       <h1 class="flex items-center gap-2 text-title font-normal">
         <Logo />
-        <a href="/" class="inline-flex flex-col leading-tight" data-testid="home">
-          <span class="tracking-tight">
-            <Brand />
-          </span>
-          <span class="hidden text-badge font-normal tracking-wide text-muted md:inline">
-            {s.puzzleList.subtitle}
-          </span>
+        <a href="/" class="leading-tight tracking-tight" data-testid="home">
+          <Brand />
         </a>
       </h1>
       {(showArchive || hasMenu) && (

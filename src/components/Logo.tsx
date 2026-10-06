@@ -44,7 +44,11 @@ export function Logo() {
   return (
     <span
       ref={ref}
-      class={classNames("inline-block size-[1.4em] cursor-pointer [&_svg]:size-full", LOOK[design])}
+      // Sized to the name beside it.
+      class={classNames(
+        "inline-block size-[1.1em] shrink-0 cursor-pointer [&_svg]:size-full",
+        LOOK[design],
+      )}
       tabIndex={0}
       role="img"
       aria-label={s.aria.logo}

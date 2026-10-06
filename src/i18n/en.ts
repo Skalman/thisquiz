@@ -28,11 +28,13 @@ function qList(qis: number[]): string {
 export default {
   app: {
     title: "This Quiz",
+    // The handwritten note by the title, one entry per line. Its font holds
+    // only these letters, so new wording needs a new cut of it.
+    tagline: ["Self-referential", "logic puzzles"],
     loading: "Loading...",
     noPuzzle: "No puzzle available for this date.",
   },
   puzzleList: {
-    subtitle: "Self-referential logic puzzles",
     questions: "questions",
   },
   difficulty: {

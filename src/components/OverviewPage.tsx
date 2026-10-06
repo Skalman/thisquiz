@@ -3,13 +3,12 @@ import { useId, useState } from "preact/hooks";
 import { useLocation } from "preact-iso";
 import { AboutDialog } from "./AboutDialog.tsx";
 import { DiamondGoal, PathStep, Rewards, useExpandedStep } from "./AdventureStep.tsx";
-import { Brand } from "./Brand.tsx";
+import { BrandTitle } from "./BrandTitle.tsx";
 import { useBackupFlow, BackupDialogs } from "./BackupFlow.tsx";
 import { DebugDialog } from "./DebugDialog.tsx";
 import { DesignContext } from "./DesignContext.tsx";
 import { LevelRail } from "./LevelRail.tsx";
 import { IconChevronDown, IconFlame, IconSettings } from "./Icons.tsx";
-import { Logo } from "./Logo.tsx";
 import { SettingsDialog } from "./SettingsDialog.tsx";
 import { ShareDialog } from "./ShareDialog.tsx";
 import { isInstalled, useInstall } from "./useInstall.ts";
@@ -247,13 +246,7 @@ export function OverviewPage() {
   return (
     <div class="mx-auto max-w-200">
       <header class="mb-6 flex flex-col items-center gap-1 pt-2 text-center">
-        <h1 class="flex items-center gap-3 text-display font-normal tracking-tight">
-          <Logo />
-          <span>
-            <Brand />
-          </span>
-        </h1>
-        <p class="text-body text-muted">{s.puzzleList.subtitle}</p>
+        <BrandTitle />
         <Streak />
       </header>
 

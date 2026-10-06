@@ -23,6 +23,12 @@
   transition: all 0.4s ease !important;
 }
 
+/* Placed by script from measured positions, so only their colors ease. */
+:root[data-switching] [data-placed],
+:root[data-switching] [data-placed] > path {
+  transition: color 0.4s ease !important;
+}
+
 /* Controls keep the browser's line height, which their sizes are tuned to. */
 button,
 input {

@@ -49,6 +49,7 @@ self.addEventListener("fetch", (event) => {
     event.request.destination === "script" ||
     event.request.destination === "style" ||
     event.request.destination === "image" ||
+    event.request.destination === "font" ||
     url.pathname.endsWith(".svg") ||
     url.pathname.endsWith(".json") ||
     // wasm (instantiateStreaming) has an empty `destination`; match extension.

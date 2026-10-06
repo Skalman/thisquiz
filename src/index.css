@@ -33,6 +33,19 @@
   --default-transition-timing-function: ease;
 }
 
+/* The tagline's handwriting: Caveat 600 (SIL Open Font License), cut down to
+   the glyphs of "Self-referential logic puzzles". New wording needs a new cut. */
+@font-face {
+  font-family: "Caveat";
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/caveat-tagline.woff2") format("woff2");
+}
+
+@theme {
+  --font-hand: "Caveat", cursive;
+}
+
 /* Shadows that read the same over either theme; the dropdown's differs per
    theme, so it maps a theme variable below. */
 @theme {
