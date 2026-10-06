@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { OptionMark } from "../engine/types.ts";
 import { OptionButton } from "./OptionButton.tsx";
 import { TutorialNext, TutorialPanel } from "./TutorialPanel.tsx";
@@ -14,6 +14,9 @@ const MARK_CYCLE: OptionMark[] = ["unmarked", "incorrect", "correct"];
 /** The line for each mark after the full cycle, by press count mod 3. */
 const LINE_AFTER = [3, 1, 2];
 
+/** How long the first line waits after the opening appears. */
+const FIRST_LINE_DELAY_MS = 2000;
+
 /** The tutorial's opening: one lone cell, pressed through its marks. */
 export function TutorialOpening({ onNext }: { onNext: () => void }) {
   const s = t().tutorial;
@@ -22,6 +25,13 @@ export function TutorialOpening({ onNext }: { onNext: () => void }) {
   const lines = s.cellSteps(pointerKind());
   const done = presses >= lines.length - 1;
   const mark = MARK_CYCLE[presses % 3];
+  // The first line waits, so the title reads first; a press brings the next at once.
+  const [greeted, setGreeted] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setGreeted(true), FIRST_LINE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  const line = presses === 0 ? (greeted ? lines[0] : null) : lines[LINE_AFTER[presses % 3]];
 
   return (
     <div class="flex flex-col items-center gap-4">
@@ -34,7 +44,7 @@ export function TutorialOpening({ onNext }: { onNext: () => void }) {
         )}
       />
       <TutorialPanel
-        message={{ text: lines[presses === 0 ? 0 : LINE_AFTER[presses % 3]] }}
+        message={line === null ? null : { text: line }}
         steps={lines.map((text) => ({ text }))}
       />
       <div class="flex w-32 *:flex-1">
