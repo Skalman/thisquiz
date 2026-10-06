@@ -12,6 +12,7 @@
     "fmt": "oxfmt --write src/ tests/ e2e/ public/sw.js *.ts *.json",
     "fmt:check": "oxfmt --check src/ tests/ e2e/ public/sw.js *.ts *.json",
     "test:e2e": "playwright test",
+    "screenshots": "pnpm build && playwright test -c playwright.screenshots.config.ts && (command -v oxipng >/dev/null && oxipng -o max --strip safe public/og-image.png public/screenshot-desktop.png public/screenshot-mobile.png || echo 'oxipng not found: images left unoptimized')",
     "test:unit": "node --test \"src/**/*.test.ts\"",
     "gen": "cargo run --release -- gen",
     "check": "cargo run --release -- check",

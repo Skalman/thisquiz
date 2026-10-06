@@ -89,6 +89,7 @@ export function BrandTitle({ class: extraClass, inert }: { class?: string; inert
   return (
     <div
       ref={root}
+      data-testid="brand-title"
       data-placed
       // Room below for the handwriting's descenders, which spill out of its line box.
       class={classNames("relative inline-block pb-[0.25em] text-left text-display", extraClass)}
