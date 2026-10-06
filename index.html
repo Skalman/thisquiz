@@ -7,27 +7,34 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#faf9f7" />
-    <title>This Quiz</title>
+    <title>This Quiz – Self-referential logic puzzles</title>
     <meta
       name="description"
-      content="Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself."
+      content="Logic puzzles where every question asks about the puzzle's own answers. Quick brainteasers or deep thinking."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="This Quiz" />
-    <meta property="og:title" content="This Quiz" />
+    <meta property="og:title" content="This Quiz – Self-referential logic puzzles" />
     <meta
       property="og:description"
-      content="Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself."
+      content="Logic puzzles where every question asks about the puzzle's own answers. Quick brainteasers or deep thinking."
     />
     <meta property="og:url" content="https://thisquiz.app/" />
     <meta property="og:image" content="https://thisquiz.app/screenshot-desktop.png" />
     <meta property="og:image:width" content="1920" />
     <meta property="og:image:height" content="1080" />
+    <meta
+      property="og:image:alt"
+      content="A This Quiz puzzle: multiple-choice questions about the puzzle's own answers."
+    />
     <meta name="twitter:card" content="summary_large_image" />
     <script>
       // Remove support for refpuzzle.com after 2027-06-01.
       // The old key covers the first boot, before the bundle moves it.
-      var t = localStorage.getItem("thisquiz:theme") || localStorage.getItem("refpuzzle:theme");
+      var t;
+      try {
+        t = localStorage.getItem("thisquiz:theme") || localStorage.getItem("refpuzzle:theme");
+      } catch (e) {}
       if (t) document.documentElement.setAttribute("data-theme", t);
       var dark = t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches);
       document.querySelector('meta[name="theme-color"]').content = dark ? "#0f1117" : "#faf9f7";

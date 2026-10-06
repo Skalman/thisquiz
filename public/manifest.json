@@ -2,7 +2,7 @@
   "id": "/",
   "name": "This Quiz",
   "short_name": "This Quiz",
-  "description": "Daily self-referential logic puzzles. Solve by deduction — each question refers to the puzzle itself.",
+  "description": "Logic puzzles where every question asks about the puzzle's own answers. Quick brainteasers or deep thinking.",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#0f1117",
