@@ -116,7 +116,6 @@ export function DailyHeader({
         <a href="/" class="inline-flex flex-col leading-tight" data-testid="home">
           <span class="tracking-tight">
             <Brand />
-            {import.meta.env.DEV && <span class="font-bold text-(--dev-badge)"> (dev)</span>}
           </span>
           <span class="hidden text-badge font-normal tracking-wide text-muted md:inline">
             {s.puzzleList.subtitle}

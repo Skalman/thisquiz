@@ -251,7 +251,6 @@ export function OverviewPage() {
           <Logo />
           <span>
             <Brand />
-            {import.meta.env.DEV && <span class="font-bold text-(--dev-badge)"> (dev)</span>}
           </span>
         </h1>
         <p class="text-body text-muted">{s.puzzleList.subtitle}</p>

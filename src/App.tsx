@@ -47,6 +47,7 @@ import { ErrorOverlay } from "./components/ErrorOverlay.tsx";
 // Remove support for refpuzzle.com after 2027-06-01.
 import { MoveBanner } from "./components/MoveBanner.tsx";
 import { SafeAreaSimulator } from "./components/SafeAreaSimulator.tsx";
+import { DevRibbon } from "./components/DevRibbon.tsx";
 import { InlineHelp } from "./components/InlineHelp.tsx";
 import { DifficultyTabs } from "./components/DifficultyTabs.tsx";
 import { PrintSheet } from "./components/PrintSheet.tsx";
@@ -523,6 +524,7 @@ export function App() {
           <Route default component={NotFound} />
         </Router>
         {import.meta.env.DEV && <SafeAreaSimulator />}
+        {import.meta.env.DEV && <DevRibbon />}
       </AppFrame>
     </LocationProvider>
   );
