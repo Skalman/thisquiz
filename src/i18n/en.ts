@@ -33,6 +33,9 @@ export default {
     tagline: ["Self-referential", "logic puzzles"],
     loading: "Loading...",
     noPuzzle: "No puzzle available for this date.",
+    wasmUnavailableTitle: "This browser can't run This Quiz",
+    wasmUnavailableBody:
+      "The puzzle needs WebAssembly, which this browser blocks or doesn't fully support. Updating the browser, or trying another browser or device, usually helps.",
   },
   puzzleList: {
     questions: "questions",

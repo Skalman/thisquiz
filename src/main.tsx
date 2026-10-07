@@ -6,7 +6,8 @@ import { setupErrorTracking, trackFatalError } from "./lib/analytics.ts";
 import { leaveLegacyHost, moveLegacyKeys } from "./lib/handoff.ts";
 import { migrateLocalStorage } from "./lib/store.ts";
 import { revalidateIfNeeded } from "./lib/revalidate.ts";
-import { wasmReady } from "./lib/wasm.ts";
+import { isWasmUnavailable, wasmReady } from "./lib/wasm.ts";
+import { t } from "./i18n/index.ts";
 
 // Provided by the inline #fatal fallback in index.html (works without the bundle).
 declare global {
@@ -35,7 +36,12 @@ function start() {
     () => render(<App />, document.getElementById("app")!),
     (e: unknown) => {
       console.error("wasm init failed", e);
-      window.showFatalError?.(e);
+      window.showFatalError?.(
+        e,
+        isWasmUnavailable(e)
+          ? { title: t().app.wasmUnavailableTitle, body: t().app.wasmUnavailableBody }
+          : undefined,
+      );
       if (import.meta.env.PROD) trackFatalError(e, "wasm_init_failed");
     },
   );

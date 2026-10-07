@@ -26,8 +26,34 @@ let wasmReadyPromise: Promise<unknown> | null = null;
  * constructing a {@link PuzzleHandle} or calling {@link generatePuzzle}.
  */
 export function wasmReady(): Promise<unknown> {
-  wasmReadyPromise ??= init();
+  wasmReadyPromise ??= initWithRetry().catch((e: unknown) => {
+    wasmReadyPromise = null;
+    throw e;
+  });
   return wasmReadyPromise;
+}
+
+const INIT_RETRY_DELAYS_MS = [1000, 3000];
+
+// A download can drop mid-body; a fresh fetch usually lands.
+async function initWithRetry(): Promise<unknown> {
+  for (const delayMs of INIT_RETRY_DELAYS_MS) {
+    try {
+      // oxlint-disable-next-line no-await-in-loop
+      return await init();
+    } catch (e) {
+      if (isWasmUnavailable(e)) throw e;
+      // oxlint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  return init();
+}
+
+/** True when this browser blocks, lacks, or can't compile our wasm; retrying won't help. */
+export function isWasmUnavailable(e: unknown): boolean {
+  if (typeof WebAssembly !== "object" || WebAssembly === null) return true;
+  return e instanceof WebAssembly.CompileError;
 }
 
 // Inverse of `lib.rs::validity_to_u8`; the encoding is documented on the Rust
