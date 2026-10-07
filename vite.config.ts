@@ -17,7 +17,7 @@ function versionPlugin(): Plugin {
     closeBundle() {
       const hash = execSync("git rev-parse --short HEAD").toString().trim();
       const ts = new Date().toISOString();
-      writeFileSync(join(__dirname, "dist", "version.txt"), `${hash} ${ts}\n`);
+      writeFileSync(join(import.meta.dirname, "dist", "version.txt"), `${hash} ${ts}\n`);
     },
   };
 }
@@ -64,7 +64,7 @@ function brotliPlugin(): Plugin {
     name: "brotli-compress",
     apply: "build",
     closeBundle() {
-      const dir = join(__dirname, "dist", "puzzles", "daily");
+      const dir = join(import.meta.dirname, "dist", "puzzles", "daily");
       let files: string[];
       try {
         files = readdirSync(dir).filter((f) => f.endsWith(".json"));
@@ -95,7 +95,7 @@ function swPrecachePlugin(): Plugin {
     name: "sw-precache",
     apply: "build",
     closeBundle() {
-      const dist = join(__dirname, "dist");
+      const dist = join(import.meta.dirname, "dist");
       const swPath = join(dist, "sw.js");
       const assets = readdirSync(join(dist, "assets")).map((file) => `/assets/${file}`);
       const precache = ["/", "/logo.svg", "/manifest.json", ...assets].sort();
