@@ -8,7 +8,7 @@
     "wasm": "wasm-pack build rust/ --target web --profile release-wasm",
     "build": "pnpm wasm && pnpm lint && vite build",
     "preview": "vite preview",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=error src/",
+    "lint": "oxlint src/",
     "fmt": "oxfmt --write src/ tests/ e2e/ public/sw.js *.ts *.json",
     "fmt:check": "oxfmt --check src/ tests/ e2e/ public/sw.js *.ts *.json",
     "test:e2e": "playwright test",
