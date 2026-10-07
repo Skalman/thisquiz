@@ -1,4 +1,5 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, HTMLAttributes } from "preact";
+import type { ButtonHTMLAttributes, HTMLAttributes } from "preact";
+import type { LinkAttributes } from "./Link.tsx";
 import { forwardRef } from "preact/compat";
 import { classNames, tw } from "../../lib/classNames.ts";
 import type { Design } from "../../lib/design.ts";
@@ -82,7 +83,7 @@ export function MenuLink({
   mobileOnly,
   class: extraClass,
   ...rest
-}: Omit<AnchorHTMLAttributes, "class" | "className"> & ItemOptions) {
+}: LinkAttributes & ItemOptions) {
   const design = useDesign();
   return (
     <a

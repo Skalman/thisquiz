@@ -1,4 +1,5 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentChildren } from "preact";
+import type { ButtonHTMLAttributes, ComponentChildren } from "preact";
+import type { LinkAttributes } from "./Link.tsx";
 import { forwardRef } from "preact/compat";
 import { classNames, tw } from "../../lib/classNames.ts";
 import type { Design } from "../../lib/design.ts";
@@ -137,14 +138,15 @@ export const Button = forwardRef<HTMLButtonElement, Styled<ButtonHTMLAttributes>
 });
 
 /** A link in a button's clothes. */
-export const ButtonLink = forwardRef<HTMLAnchorElement, Styled<AnchorHTMLAttributes>>(
-  function ButtonLink({ variant, size, class: extraClass, icon, children, ...rest }, ref) {
-    const design = useDesign();
-    return (
-      <a ref={ref} class={buttonClass({ variant, size, design, class: extraClass })} {...rest}>
-        {icon}
-        {children}
-      </a>
-    );
-  },
-);
+export const ButtonLink = forwardRef<HTMLAnchorElement, Styled<LinkAttributes>>(function ButtonLink(
+  { variant, size, class: extraClass, icon, children, ...rest },
+  ref,
+) {
+  const design = useDesign();
+  return (
+    <a ref={ref} class={buttonClass({ variant, size, design, class: extraClass })} {...rest}>
+      {icon}
+      {children}
+    </a>
+  );
+});

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "jsqr": "^1.4.0",
-    "preact": "^10.29.1",
+    "preact": "^11.0.0",
     "preact-iso": "^2.12.2",
     "tinykeys": "^3.0.0",
     "uqr": "^0.1.3"
